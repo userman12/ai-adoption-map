@@ -24,9 +24,10 @@
 </header>
 
 <section class="pulse" aria-label="EU27">
-  <div class="hero" aria-live="polite">
+  <div class="hero">
+    <p class="sr-only" id="heroSr" aria-live="polite"></p>
     <p class="hero-key"><i class="eu-dot"></i><span id="heroLabel"></span></p>
-    <p class="hero-num" id="heroNum">—</p>
+    <p class="hero-num" id="heroNum" aria-hidden="true">—</p>
     <p class="hero-delta" id="heroDelta"></p>
   </div>
   <div class="years-wrap">
@@ -55,6 +56,7 @@
 
   <section class="rank" aria-labelledby="rankTitle">
     <h2 id="rankTitle"></h2>
+    <div class="euref" id="euRef"></div>
     <ol id="rankList"></ol>
     <p class="note" id="missing"></p>
   </section>

@@ -125,14 +125,21 @@ svg.append("g").selectAll("path").data(feats.filter((f) => !isCovered(f))).join(
 const ctry = svg.append("g").selectAll("path").data(feats.filter(isCovered)).join("path")
   .attr("class", "ctry").attr("d", path).attr("tabindex", 0).attr("role", "img");
 
-// ---- tooltip ----
+// ---- motion ----
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const DUR = reduced ? 0 : 550;
+const ROW = 22; // ranking row height, px
+
+// ---- tooltip + linked highlight (map <-> ranking) ----
 const wrap = document.querySelector(".mapwrap"), tip = $("tip");
+let rows = []; // countries with a value, sorted desc, for the current view
+const cap = (x) => x[0].toUpperCase() + x.slice(1);
 function tipHtml(c) {
   const { y, s } = state, v = val(c, s, y);
   const tag = EU.has(c) ? "" : `<span class="tag">${t.nonEU}</span>`;
   if (v == null) return `<b>${name(c)}</b>${tag}<br><span class="m">${t.noData}</span>`;
   const py = prevYear(y), pv = py && val(c, s, py), f = flag(c, s, y);
-  return `<b>${name(c)}</b>${tag}<span class="v">${pct(v)}</span><span class="m">${t.sizeLong[s]}, ${y}</span>` +
+  return `<b>${name(c)}</b>${tag}<span class="v">${pct(v)}</span><span class="m">${t.sizeLong[s]}, ${y} · ${rows.indexOf(c) + 1}/${rows.length}</span>` +
     (pv != null && py ? `<br>${pp(v - pv)} ${t.vs} ${py}` : "") +
     (f ? `<br><span class="m">${t.note}: ${flagText(f)}</span>` : "");
 }
@@ -146,35 +153,53 @@ function showTip(c, x, y) {
   const top = y + 16 + tip.offsetHeight > r.height ? y - tip.offsetHeight - 12 : y + 16;
   Object.assign(tip.style, { left: `${left}px`, top: `${Math.max(top, 4)}px` });
 }
-const hideTip = () => { tipFor = null; tip.hidden = true; };
+function highlight(c) {
+  ctry.classed("hl", (f) => byNum[f.id] === c);
+  d3.selectAll("#rankList li").classed("hl", (d) => d === c);
+}
+const hideTip = () => { tipFor = null; tip.hidden = true; highlight(null); };
 const local = (e) => { const r = wrap.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+const tipAtCountry = (c) => {
+  const f = ctry.data().find((g) => byNum[g.id] === c), k = wrap.getBoundingClientRect().width / W, [cx, cy] = path.centroid(f);
+  showTip(c, cx * k, cy * k); highlight(c);
+};
 ctry
-  .on("pointermove pointerdown", (e, f) => showTip(byNum[f.id], ...local(e)))
+  .on("pointermove pointerdown", (e, f) => { showTip(byNum[f.id], ...local(e)); highlight(byNum[f.id]); })
   .on("pointerleave", (e) => { if (e.pointerType === "mouse") hideTip(); })
-  .on("focus", (e, f) => {
-    const k = wrap.getBoundingClientRect().width / W, [cx, cy] = path.centroid(f);
-    showTip(byNum[f.id], cx * k, cy * k);
-  })
+  .on("focus", (e, f) => tipAtCountry(byNum[f.id]))
   .on("blur", hideTip);
 svg.on("pointerdown", (e) => { if (!e.target.classList.contains("ctry")) hideTip(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(); });
+// hovering a ranking row points at the country on the map (mouse only; on touch the list is just a list)
+d3.select("#rankList")
+  .on("pointerover", (e) => { const li = e.target.closest("li"); if (li && e.pointerType === "mouse") tipAtCountry(d3.select(li).datum()); })
+  .on("pointerleave", (e) => { if (e.pointerType === "mouse") hideTip(); });
 
 // ---- render ----
+let heroVal = null;
 function render() {
   const { y, s, l } = state;
+  rows = covered.filter((c) => val(c, s, y) != null).sort((a, b) => val(b, s, y) - val(a, s, y));
   const fill = (c) => { const v = val(c, s, y); return v == null ? "url(#hatch)" : `var(--b${bin(v)})`; };
   ctry.style("fill", (f) => fill(byNum[f.id]))
     .attr("aria-label", (f) => { const c = byNum[f.id], v = val(c, s, y);
       return `${name(c)}${EU.has(c) ? "" : ` (${t.nonEU})`}: ${v == null ? t.noData : pct(v)}`; });
   if (tipFor) tip.innerHTML = tipHtml(tipFor);
 
-  // headline
+  // headline: the number runs to its new value
   const eu = val("EU27", s, y), py = prevYear(y), peu = py && val("EU27", s, py);
-  $("heroNum").textContent = eu == null ? t.noData : pct(eu);
-  $("heroLabel").textContent = `${t.eu} · ${t.sizeLong[s]} · ${y}`;
+  const hero = d3.select("#heroNum").interrupt();
+  if (eu == null) hero.text(t.noData);
+  else if (heroVal == null || !DUR) hero.text(pct(eu));
+  else { const from = heroVal;
+    hero.transition().duration(DUR + 150).ease(d3.easeCubicOut)
+      .tween("text", () => { const i = d3.interpolateNumber(from, eu); return (k) => hero.text(pct(i(k))); }); }
+  heroVal = eu;
+  $("heroLabel").textContent = `${t.eu} · ${cap(t.sizeLong[s])} · ${y}`;
   $("heroDelta").innerHTML = eu != null && peu != null ? `<b>${pp(eu - peu)}</b> ${t.vs} ${py}` : "";
+  $("heroSr").textContent = `${t.eu}, ${t.sizeLong[s]}, ${y}: ${eu == null ? t.noData : pct(eu)}`;
 
-  // year selector = EU27 trend for the selected size
+  // year selector = EU27 trend for the selected size;
   // bars share a scale within the selected size, so the trend's shape is what reads
   const euMax = Math.max(...YEARS.map((yy) => val("EU27", s, yy) ?? 0));
   document.querySelectorAll("#years button").forEach((b) => {
@@ -188,17 +213,31 @@ function render() {
   document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.l === l));
   $("play").textContent = timer ? `❚❚ ${t.pause}` : `▶ ${t.play}`;
 
-  // ranking
-  const rows = covered.filter((c) => val(c, s, y) != null).sort((a, b) => val(b, s, y) - val(a, s, y));
-  const euMark = eu == null ? "" : `<span class="eu" style="left:${(eu / BAR_MAX) * 100}%"></span>`;
-  $("rankTitle").textContent = `${t.ranking} · ${t.sizeLong[s]} · ${y}`;
-  $("rankList").innerHTML =
-    (eu == null ? "" : `<li class="euref"><span class="n"></span><span class="nm"><i class="eu-dot"></i><span>${t.euAvg}</span></span><span class="bar">${euMark}</span><span class="val">${pct(eu)}</span></li>`) +
-    rows.map((c, i) => { const v = val(c, s, y), f = flag(c, s, y);
-      return `<li><span class="n">${i + 1}</span>` +
-        `<span class="nm"><span>${name(c)}</span>${EU.has(c) ? "" : `<span class="tag">${t.nonEU}</span>`}</span>` +
-        `<span class="bar"><i style="width:${(v / BAR_MAX) * 100}%"></i>${euMark}</span>` +
-        `<span class="val">${pct(v)}${f ? `<abbr title="${t.note}: ${flagText(f)}">*</abbr>` : ""}</span></li>`; }).join("");
+  // ranking: rows keyed by country slide to their new rank
+  $("rankTitle").textContent = `${t.ranking} · ${cap(t.sizeLong[s])} · ${y}`;
+  const euLeft = eu == null ? null : `${(eu / BAR_MAX) * 100}%`;
+  $("euRef").innerHTML = eu == null ? "" :
+    `<span class="n"></span><span class="nm"><i class="eu-dot"></i><span>${t.euAvg}</span></span><span class="bar"><span class="eu" style="left:${euLeft}"></span></span><span class="val">${pct(eu)}</span>`;
+  const at = (i) => `translateY(${i * ROW}px)`;
+  const li = d3.select("#rankList").style("height", `${rows.length * ROW}px`)
+    .selectAll("li").data(rows, (d) => d)
+    .join(
+      (enter) => enter.append("li").style("opacity", 0).style("transform", (d, i) => at(i))
+        .html(`<span class="n"></span><span class="nm"><span class="cn"></span></span><span class="bar"><i></i></span><span class="val"></span>`),
+      (update) => update,
+      (exit) => exit.transition().duration(DUR).style("opacity", 0).remove(),
+    )
+    .order(); // DOM order = rank order, for screen readers
+  li.transition().duration(DUR).ease(d3.easeCubicInOut).style("opacity", 1).style("transform", (d, i) => at(i));
+  li.select(".n").text((d, i) => i + 1);
+  li.select(".cn").text(name);
+  li.select(".nm").selectAll(".tag").data((d) => (EU.has(d) ? [] : [d])).join("span").attr("class", "tag").text(t.nonEU);
+  li.select(".bar i").transition().duration(DUR).ease(d3.easeCubicInOut).style("width", (d) => `${(val(d, s, y) / BAR_MAX) * 100}%`);
+  li.select(".bar").selectAll(".eu").data(euLeft ? [euLeft] : []).join("span").attr("class", "eu")
+    .transition().duration(DUR).style("left", (d) => d);
+  li.select(".val").html((d) => { const f = flag(d, s, y);
+    return `${pct(val(d, s, y))}${f ? `<abbr title="${t.note}: ${flagText(f)}">*</abbr>` : ""}`; });
+
   const missing = covered.filter((c) => val(c, s, y) == null).map(name);
   $("missing").textContent = [missing.length ? `${t.noDataFor(y)} ${missing.join(", ")}.` : "",
     rows.some((c) => flag(c, s, y)) ? t.flagFoot : ""].filter(Boolean).join(" ");
