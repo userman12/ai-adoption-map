@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Adoption Map</title>
+<meta name="description" content="How fast is AI spreading through European businesses? Share of enterprises (10+ employees) using at least one AI technology, by country, 2021 to today. Source: Eurostat.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<header class="hd">
+  <div class="kicker">AI in European business · Eurostat</div>
+  <h1>How fast is AI spreading through European businesses?</h1>
+  <p class="sub">Share of enterprises (10+ employees) using at least one AI technology. Source: Eurostat.</p>
+  <div class="hero" aria-live="polite">
+    <span class="hero-num" id="heroNum">—</span>
+    <span class="hero-txt"><span id="heroLabel">EU27</span><br><span id="heroDelta"></span></span>
+  </div>
+</header>
+
+<section class="controls" aria-label="View controls">
+  <div class="crow">
+    <span class="clbl" id="yearLbl">Year</span>
+    <div class="seg" id="years" role="group" aria-labelledby="yearLbl"></div>
+    <button class="btn play" id="play" aria-pressed="false">▶ Play</button>
+  </div>
+  <div class="crow">
+    <span class="clbl" id="sizeLbl">Size</span>
+    <div class="seg" id="sizes" role="group" aria-labelledby="sizeLbl">
+      <button data-s="all">All</button>
+      <button data-s="small">Small <small>10-49</small></button>
+      <button data-s="medium">Medium <small>50-249</small></button>
+      <button data-s="large">Large <small>250+</small></button>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <figure class="mapwrap">
+    <svg id="map" viewBox="0 0 600 620" role="group" aria-label="Map of Europe, coloured by share of enterprises using AI. Tab through countries to read values."></svg>
+    <div class="tip" id="tip" role="status" hidden></div>
+    <figcaption class="legend" id="legend" aria-label="Colour legend"></figcaption>
+  </figure>
+
+  <section class="rank" aria-labelledby="rankTitle">
+    <h2 id="rankTitle">Ranking</h2>
+    <ol id="rankList"></ol>
+    <p class="note" id="missing"></p>
+  </section>
+</main>
+
+<aside class="series">
+  <div class="kicker">Part 2 of a series</div>
+  <p>Part 1 showed how long it took each country to go from 10% to 50% of people online. This one shows where businesses stand with AI. <a id="part1">See Part 1 →</a></p>
+</aside>
+
+<footer class="ft">
+  <p>Source: <a id="srcLink">Eurostat</a>, dataset <code>isoc_eb_ai</code>, extracted <span id="extracted">—</span>.</p>
+  <p>Built by <a id="author"></a> · No data is collected from visitors.</p>
+</footer>
+</body>
+</html>
