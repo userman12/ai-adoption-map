@@ -5,11 +5,14 @@ import { readFileSync } from 'node:fs';
 const d = JSON.parse(readFileSync(new URL('../data/ai-adoption.json', import.meta.url), 'utf8'));
 const errors = [], warnings = [];
 
-// 1. every value is a number in [0, 100]
-for (const [geo, bySize] of Object.entries(d.values))
-  for (const [size, byYear] of Object.entries(bySize))
-    for (const [year, v] of Object.entries(byYear))
-      if (typeof v !== 'number' || !(v >= 0 && v <= 100)) errors.push(`${geo} ${size} ${year}: ${v} is not a number in 0-100`);
+// 1. every value is a number in [0, 100], main indicator and the extra ones
+for (const [ind, { values }] of [['main', d], ...Object.entries(d.more ?? {})])
+  for (const [geo, bySize] of Object.entries(values))
+    for (const [size, byYear] of Object.entries(bySize))
+      for (const [year, v] of Object.entries(byYear))
+        if (typeof v !== 'number' || !(v >= 0 && v <= 100)) errors.push(`${ind} ${geo} ${size} ${year}: ${v} is not a number in 0-100`);
+for (const [ind, m] of Object.entries(d.more ?? {}))
+  if (!m.years.length || !m.values.EU27) errors.push(`${ind}: no EU27 values`);
 
 // 2. EU27 "all" exists for every year
 for (const y of d.years)
@@ -35,4 +38,4 @@ for (const [geo, size, want] of SPOT) {
 for (const w of warnings) console.warn('WARN ', w);
 for (const e of errors) console.error('ERROR', e);
 if (errors.length) process.exit(1);
-console.log(`OK: ${Object.keys(d.values).length} areas, years ${d.years.join(', ')}, ${warnings.length} warning(s)`);
+console.log(`OK: ${Object.keys(d.values).length} areas, +${Object.keys(d.more ?? {}).length} indicators, years ${d.years.join(', ')}, ${warnings.length} warning(s)`);

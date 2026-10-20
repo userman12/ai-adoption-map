@@ -26,6 +26,7 @@
 <section class="pulse" aria-label="EU27">
   <div class="hero">
     <p class="sr-only" id="heroSr" aria-live="polite"></p>
+    <p class="hero-ind" id="heroInd"></p>
     <p class="hero-key"><i class="eu-dot"></i><span id="heroLabel"></span></p>
     <p class="hero-num" id="heroNum" aria-hidden="true">—</p>
     <p class="hero-delta" id="heroDelta"></p>
@@ -38,12 +39,25 @@
 </section>
 
 <div class="sizes-row">
-  <p class="ctl-lbl" id="sizeLbl" data-i18n="size"></p>
-  <div class="seg" id="sizes" role="group" aria-labelledby="sizeLbl">
-    <button data-s="all"></button>
-    <button data-s="small"></button>
-    <button data-s="medium"></button>
-    <button data-s="large"></button>
+  <div class="ctl ctl-ind">
+    <label class="ctl-lbl" for="ind" data-i18n="indicator"></label>
+    <select id="ind"></select>
+  </div>
+  <div class="ctl">
+    <p class="ctl-lbl" id="sizeLbl" data-i18n="size"></p>
+    <div class="seg" id="sizes" role="group" aria-labelledby="sizeLbl">
+      <button data-s="all"></button>
+      <button data-s="small"></button>
+      <button data-s="medium"></button>
+      <button data-s="large"></button>
+    </div>
+  </div>
+  <div class="ctl">
+    <p class="ctl-lbl" id="viewLbl" data-i18n="view"></p>
+    <div class="seg" id="views" role="group" aria-labelledby="viewLbl">
+      <button data-v="map"></button>
+      <button data-v="globe"></button>
+    </div>
   </div>
 </div>
 
@@ -54,11 +68,15 @@
     <figcaption class="legend" id="legend"></figcaption>
   </figure>
 
-  <section class="rank" aria-labelledby="rankTitle">
-    <h2 id="rankTitle"></h2>
-    <div class="euref" id="euRef"></div>
-    <ol id="rankList"></ol>
-    <p class="note" id="missing"></p>
+  <section class="rank" id="rank" aria-live="off">
+    <div id="rankView">
+      <h2 id="rankTitle"></h2>
+      <p class="hint" data-i18n="hint"></p>
+      <div class="euref" id="euRef"></div>
+      <ol id="rankList"></ol>
+      <p class="note" id="missing"></p>
+    </div>
+    <div class="profile" id="profile" hidden></div>
   </section>
 </main>
 

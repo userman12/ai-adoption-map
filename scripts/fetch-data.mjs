@@ -23,22 +23,43 @@ for (const [d, c] of Object.entries(FILTER)) {
 // JSON-stat: flat row-major index over j.id / j.size
 const pos = (o) => j.id.reduce((p, d, i) => p * j.size[i] + j.dimension[d].category.index[o[d]], 0);
 
-const values = {}, flags = {}, years = new Set();
-for (const geo of codes('geo')) {
-  if (SKIP_GEO.has(geo)) continue;
-  const key = GEO[geo] ?? geo;
-  for (const [sizeCode, size] of Object.entries(SIZES)) {
-    for (const time of codes('time')) {
-      const p = pos({ ...FILTER, geo, size_emp: sizeCode, time });
-      const v = j.value[p];
-      if (v == null) continue; // missing stays absent, never 0
-      ((values[key] ??= {})[size] ??= {})[time] = v;
-      years.add(Number(time));
-      const f = j.status?.[p];
-      if (f) ((flags[key] ??= {})[size] ??= {})[time] = f;
+// Additional indicators, same dataset. unit = the base the percentage is computed on.
+const MORE = {
+  // technologies + intensity: % of all enterprises
+  ...Object.fromEntries(['TTM', 'TSR', 'TNLG', 'TIR', 'TML', 'TPA', 'TAR', 'TPVSG', 'TGE2', 'TGE3']
+    .map((k) => [k.toLowerCase(), { code: `E_AI_${k}`, unit: 'PC_ENT' }])),
+  // purposes: % of enterprises using AI
+  ...Object.fromEntries(['PMS', 'PPP', 'PBAM', 'PFIN', 'PLOG', 'PITS', 'PRDI']
+    .map((k) => [k.toLowerCase(), { code: `E_AI_${k}`, unit: 'PC_ENT_AI_TANY' }])),
+  // barriers: % of enterprises that considered AI but don't use it
+  ...Object.fromEntries(['BCST', 'BLE', 'BINC', 'BDDT', 'BCDP', 'BLEG', 'BEC', 'BNU']
+    .map((k) => [k.toLowerCase(), { code: `E_AI_${k}`, unit: 'PC_ENT_AI_EC' }])),
+};
+
+function extract(indic_is, unit) {
+  for (const [d, c] of [['indic_is', indic_is], ['unit', unit]])
+    if (!codes(d).includes(c)) throw new Error(`Code ${c} not found in dimension ${d}`);
+  const values = {}, flags = {}, years = new Set();
+  for (const geo of codes('geo')) {
+    if (SKIP_GEO.has(geo)) continue;
+    const key = GEO[geo] ?? geo;
+    for (const [sizeCode, size] of Object.entries(SIZES)) {
+      for (const time of codes('time')) {
+        const p = pos({ ...FILTER, indic_is, unit, geo, size_emp: sizeCode, time });
+        const v = j.value[p];
+        if (v == null) continue; // missing stays absent, never 0
+        ((values[key] ??= {})[size] ??= {})[time] = v;
+        years.add(Number(time));
+        const f = j.status?.[p];
+        if (f) ((flags[key] ??= {})[size] ??= {})[time] = f;
+      }
     }
   }
+  return { years: [...years].sort((a, b) => a - b), values, flags };
 }
+
+const main = extract(FILTER.indic_is, FILTER.unit);
+const more = Object.fromEntries(Object.entries(MORE).map(([k, { code, unit }]) => [k, { code, unit, ...extract(code, unit) }]));
 
 const out = {
   source: 'Eurostat, isoc_eb_ai',
@@ -48,10 +69,12 @@ const out = {
   indicator: 'Enterprises using at least one AI technology (% of enterprises)',
   codes: { ...FILTER, size_emp: SIZES },
   flagLabels: j.extension?.status?.label ?? {},
-  years: [...years].sort((a, b) => a - b),
+  years: main.years,
   sizeClasses: Object.values(SIZES),
-  values,
-  flags,
+  values: main.values,
+  flags: main.flags,
+  unitLabels: Object.fromEntries(codes('unit').map((u) => [u, j.dimension.unit.category.label[u]])),
+  more,
 };
 writeFileSync(new URL('../data/ai-adoption.json', import.meta.url), JSON.stringify(out, null, 1) + '\n');
-console.log(`Wrote data/ai-adoption.json: ${Object.keys(values).length} areas, years ${out.years.join(', ')}`);
+console.log(`Wrote data/ai-adoption.json: ${Object.keys(main.values).length} areas, years ${out.years.join(', ')}, +${Object.keys(more).length} indicators`);
