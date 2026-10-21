@@ -294,7 +294,9 @@ function profileHtml(c) {
     `<div class="cp-hero"><p class="cp-ind">${t.ind[i]}</p><p class="cp-num">${v == null ? t.noData : pct(v)}</p>` +
     `<p class="cp-cmp">${[eu != null && `${t.euAvg} <b>${pct(eu)}</b>`, v != null && `${t.rank} <b>${rows.indexOf(c) + 1}/${rows.length}</b>`].filter(Boolean).join(" · ")}</p></div>`;
   const sections = GROUPS.map((g) => {
-    const items = g.items.filter((k) => yearsOf(k).includes(y));
+    // highest first; no data at the bottom, ties broken by EU27 value
+    const items = g.items.filter((k) => yearsOf(k).includes(y))
+      .sort((a, b) => (val(b, c, s, y) ?? -1) - (val(a, c, s, y) ?? -1) || (val(b, "EU27", s, y) ?? -1) - (val(a, "EU27", s, y) ?? -1));
     const vals = items.flatMap((k) => [val(k, c, s, y), val(k, "EU27", s, y)]).filter((x) => x != null);
     if (!vals.length) return `<section class="cp-sec"><h3>${t.groups[g.id]}</h3><p class="note">${t.notSurveyed(y)}</p></section>`;
     const max = Math.ceil(Math.max(...vals) / 10) * 10;
