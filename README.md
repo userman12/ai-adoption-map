@@ -21,7 +21,7 @@ How fast is AI spreading through European businesses? An interactive map of the 
 - **Map or 3D globe**: switch to a draggable orthographic globe that turns to face Europe.
 - **Shareable links**: the whole view lives in the URL, so any view is a link: `#y=2024&s=large&i=pms&v=globe&c=IT&l=it` (year, size, indicator, globe, open country, language).
 - **English and Italian**, including number formats (20.0% / 20,0%).
-- **Light and dark theme**, following the system setting.
+- **Light and dark theme**: follows the system setting until you pick one with the switch next to the language buttons; the choice is kept in your browser only.
 - **Accessible**: Tab through countries on the map, Enter or Space opens a profile, Esc closes it. Countries and controls have screen-reader labels, text meets WCAG AA contrast, and reduced-motion settings turn the animations off.
 - **Works on phones** from 360 px wide.
 - **Private and static**: no backend, cookies or analytics. The browser loads the site's own files plus D3, TopoJSON and the world atlas from public CDNs, and never calls the Eurostat API.

@@ -6,6 +6,11 @@
 <title>AI Adoption Map</title>
 <meta name="description" content="How fast is AI spreading through European businesses? Share of enterprises (10+ employees) using at least one AI technology, by country, 2021 to today. Source: Eurostat.">
 <meta name="color-scheme" content="light dark">
+<script>
+  // theme before first paint: the visitor's saved choice, else the system setting
+  try { var theme = localStorage.getItem("theme"); } catch (e) {}
+  document.documentElement.dataset.theme = theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+</script>
 <link rel="preload" href="fonts/schibsted-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
@@ -15,9 +20,15 @@
 <body>
 <header class="top">
   <h1 data-i18n="title"></h1>
-  <div class="lang" role="group" aria-label="Language">
-    <button data-l="en" lang="en">EN</button>
-    <button data-l="it" lang="it">IT</button>
+  <div class="prefs">
+    <div class="lang" role="group" aria-label="Language">
+      <button data-l="en" lang="en">EN</button>
+      <button data-l="it" lang="it">IT</button>
+    </div>
+    <button class="theme" id="theme" type="button">
+      <svg class="i-moon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13.5 9.6A5.75 5.75 0 0 1 6.4 2.5a5.75 5.75 0 1 0 7.1 7.1z"/></svg>
+      <svg class="i-sun" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.06 1.06M11.54 11.54l1.06 1.06M3.4 12.6l1.06-1.06M11.54 4.46l1.06-1.06"/></svg>
+    </button>
   </div>
   <p class="sub" data-i18n="sub"></p>
 </header>

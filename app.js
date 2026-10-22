@@ -41,7 +41,7 @@ const T = {
     seriesKicker: "Part 2 of a series",
     seriesText: "Part 1 showed how long it took each country to go from 10% to 50% of people online. This one shows where businesses stand with AI.",
     seriesLink: "See Part 1 →", source: "Source:", dataset: "dataset", extracted: "extracted",
-    builtBy: "Built by", privacy: "No data is collected from visitors.",
+    builtBy: "Built by", privacy: "No data is collected from visitors.", toDark: "Switch to dark theme", toLight: "Switch to light theme",
     flags: { b: "Break in series", u: "Low reliability", bu: "Break in series, low reliability", d: "Definition differs", e: "Estimate", p: "Provisional", c: "Confidential" },
     groups: { adoption: "Adoption", tech: "Technologies", purpose: "What AI is used for", barrier: "Why non-users hold back" },
     base: { share: "% of enterprises", users: "% of enterprises using AI", considered: "% of enterprises that considered AI but don't use it" },
@@ -73,7 +73,7 @@ const T = {
     seriesKicker: "Seconda puntata di una serie",
     seriesText: "La prima puntata mostrava quanto ha impiegato ogni paese a passare dal 10% al 50% di persone online. Questa mostra a che punto sono le imprese con l'AI.",
     seriesLink: "Vedi la prima puntata →", source: "Fonte:", dataset: "dataset", extracted: "estratto il",
-    builtBy: "Realizzato da", privacy: "Nessun dato viene raccolto dai visitatori.",
+    builtBy: "Realizzato da", privacy: "Nessun dato viene raccolto dai visitatori.", toDark: "Passa al tema scuro", toLight: "Passa al tema chiaro",
     flags: { b: "Interruzione di serie", u: "Bassa affidabilità", bu: "Interruzione di serie, bassa affidabilità", d: "Definizione diversa", e: "Stima", p: "Provvisorio", c: "Riservato" },
     groups: { adoption: "Adozione", tech: "Tecnologie", purpose: "Per cosa si usa l'AI", barrier: "Perché chi non la usa si frena" },
     base: { share: "% delle imprese", users: "% delle imprese che usano l'AI", considered: "% delle imprese che hanno valutato l'AI ma non la usano" },
@@ -158,9 +158,26 @@ function setLang(l) {
   document.querySelectorAll("#sizes button").forEach((b) =>
     (b.innerHTML = `${t.sizes[b.dataset.s]}<small>${SIZE_RANGE[b.dataset.s]}</small>`));
   document.querySelectorAll("#views button").forEach((b) => (b.textContent = t[b.dataset.v]));
+  syncTheme();
   $("ind").innerHTML = GROUPS.map((g) => `<optgroup label="${t.groups[g.id]}">` +
     g.items.map((k) => `<option value="${k}">${t.ind[k]}</option>`).join("") + "</optgroup>").join("");
 }
+
+// ---- theme: the head script sets data-theme before first paint ----
+const root = document.documentElement, systemDark = matchMedia("(prefers-color-scheme: dark)");
+function syncTheme() {
+  const label = root.dataset.theme === "dark" ? t.toLight : t.toDark;
+  Object.assign($("theme"), { title: label, ariaLabel: label });
+}
+$("theme").addEventListener("click", () => {
+  root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+  syncTheme();
+});
+systemDark.addEventListener("change", (e) => { // follow the system until the visitor picks a theme
+  let saved = null; try { saved = localStorage.getItem("theme"); } catch {}
+  if (!saved) { root.dataset.theme = e.matches ? "dark" : "light"; syncTheme(); }
+});
 
 // ---- static chrome ----
 $("part1").href = PART1_URL;
