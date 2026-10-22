@@ -43,23 +43,28 @@
   </div>
   <div class="years-wrap">
     <p class="ctl-lbl" id="yearLbl" data-i18n="year"></p>
-    <div class="years" id="years" role="group" aria-labelledby="yearLbl" aria-describedby="yearNote"></div>
+    <!-- play sits at the start of the timeline, like a media player -->
+    <div class="timeline">
+      <button class="play" id="play" aria-pressed="false">
+        <svg class="i-play" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M5.5 3.1v9.8a.6.6 0 0 0 .92.5l7.5-4.9a.6.6 0 0 0 0-1L6.42 2.6a.6.6 0 0 0-.92.5z"/></svg>
+        <svg class="i-pause" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="3.5" y="3" width="3" height="10" rx="1"/><rect x="9.5" y="3" width="3" height="10" rx="1"/></svg>
+      </button>
+      <div class="years" id="years" role="group" aria-labelledby="yearLbl" aria-describedby="yearNote"></div>
+    </div>
   </div>
-  <button class="play" id="play" aria-pressed="false"></button>
   <p class="ynote" id="yearNote" hidden></p>
 </section>
 
-<div class="sizes-row">
-  <div class="ctl ctl-ind">
+<div class="filters">
+  <div class="ctl">
     <label class="ctl-lbl" for="ind" data-i18n="indicator"></label>
     <select id="ind"></select>
   </div>
-  <div class="ctl ctl-sec">
+  <div class="ctl">
     <label class="ctl-lbl" for="sector" data-i18n="sector"></label>
     <select id="sector"></select>
   </div>
-  <span class="brk" aria-hidden="true"></span>
-  <div class="ctl">
+  <div class="ctl ctl-size">
     <p class="ctl-lbl" id="sizeLbl" data-i18n="size"></p>
     <div class="seg" id="sizes" role="group" aria-labelledby="sizeLbl">
       <button data-s="all"></button>
@@ -68,18 +73,16 @@
       <button data-s="large"></button>
     </div>
   </div>
-  <div class="ctl ctl-view">
-    <p class="ctl-lbl" id="viewLbl" data-i18n="view"></p>
-    <div class="seg" id="views" role="group" aria-labelledby="viewLbl">
-      <button data-v="map"></button>
-      <button data-v="globe"></button>
-    </div>
-  </div>
   <p class="ctl-note" id="sizeNote" data-i18n="sectorNote" hidden></p>
 </div>
 
 <main class="grid">
   <figure class="mapwrap">
+    <!-- map or globe: a control of the map panel itself -->
+    <div class="seg views" id="views" role="group">
+      <button data-v="map"></button>
+      <button data-v="globe"></button>
+    </div>
     <svg id="map" viewBox="0 0 600 620" role="group"></svg>
     <div class="tip" id="tip" role="status" hidden></div>
     <figcaption class="legend" id="legend"></figcaption>

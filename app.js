@@ -33,7 +33,7 @@ const T = {
     title: "How fast is AI spreading through European businesses?",
     sub: "Share of enterprises (10+ employees) using at least one AI technology. Source: Eurostat.",
     year: "Year", size: "Company size", indicator: "Indicator", view: "View", map: "Map", globe: "Globe",
-    play: "Play", pause: "Pause", skipped: (y) => `No data for ${y}: Eurostat's survey had no AI questions that year.`,
+    playYears: "Play through the years", skipped: (y) => `No data for ${y}: Eurostat's survey had no AI questions that year.`,
     sector: "Sector", sectorAll: "All sectors", bySector: "By sector",
     sectors: { C: "Manufacturing", D_E: "Energy, water and waste", F: "Construction", G: "Wholesale and retail trade",
       H: "Transport and storage", I: "Accommodation and food services", J: "Information and communication", L: "Real estate",
@@ -85,7 +85,7 @@ const T = {
     title: "Quanto velocemente si diffonde l'AI nelle imprese europee?",
     sub: "Quota di imprese (10+ addetti) che usano almeno una tecnologia di AI. Fonte: Eurostat.",
     year: "Anno", size: "Dimensione d'impresa", indicator: "Indicatore", view: "Vista", map: "Mappa", globe: "Globo",
-    play: "Riproduci", pause: "Pausa", skipped: (y) => `Nessun dato per il ${y}: quell'anno l'indagine Eurostat non conteneva domande sull'AI.`,
+    playYears: "Riproduci gli anni", skipped: (y) => `Nessun dato per il ${y}: quell'anno l'indagine Eurostat non conteneva domande sull'AI.`,
     sector: "Settore", sectorAll: "Tutti i settori", bySector: "Per settore",
     sectors: { C: "Manifattura", D_E: "Energia, acqua e rifiuti", F: "Costruzioni", G: "Commercio all'ingrosso e al dettaglio",
       H: "Trasporti e magazzinaggio", I: "Alloggio e ristorazione", J: "Informazione e comunicazione", L: "Attività immobiliari",
@@ -208,6 +208,8 @@ function setLang(l) {
   document.querySelectorAll("#sizes button").forEach((b) =>
     (b.innerHTML = `${t.sizes[b.dataset.s]}<small>${SIZE_RANGE[b.dataset.s]}</small>`));
   document.querySelectorAll("#views button").forEach((b) => (b.textContent = t[b.dataset.v]));
+  $("views").setAttribute("aria-label", t.view); // no visible label: the toggle sits on the map it switches
+  Object.assign($("play"), { title: t.playYears, ariaLabel: t.playYears }); // the icon shows play or pause
   syncTheme();
   Object.assign($("yearNote"), { hidden: !SKIPPED.length, textContent: SKIPPED.length ? t.skipped(SKIPPED.join(", ")) : "" });
   $("ind").innerHTML = GROUPS.map((g) => `<optgroup label="${t.groups[g.id]}">` +
@@ -538,7 +540,6 @@ function render() {
   document.querySelectorAll("#views button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === v));
   document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.l === l));
   $("ind").value = i;
-  $("play").textContent = timer ? `❚❚ ${t.pause}` : `▶ ${t.play}`;
   $("play").disabled = yearsOf(i).length < 2;
 
   // country profile replaces the ranking while open

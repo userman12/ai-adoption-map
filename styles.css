@@ -8,7 +8,7 @@
   --paper:#f5f6f8;--panel:#ffffff;--ink:#0f1a2e;--muted:#4f5a6c;--faint:#646d7e;--line:#e1e5ec;
   --eu:#b7791f;--eu-ink:#94600f;--land:#e7eaf0;--edge:#ffffff;--focus:#2546d6;
   --b0:#e2e7f6;--b1:#b1bdea;--b2:#7b8fd9;--b3:#4a5fc1;--b4:#22328c;
-  --nodata:#eef0f4;--hatch:#a6aebb;--ocean:#e2e9f4;--limb:#0f1a2e;--shadow:0 1px 2px rgba(15,26,46,.06),0 8px 24px rgba(15,26,46,.06);--tip-shadow:0 6px 24px rgba(15,26,46,.16);
+  --nodata:#eef0f4;--hatch:#a6aebb;--ocean:#e2e9f4;--limb:#0f1a2e;--shadow:0 1px 2px rgba(15,26,46,.06),0 8px 24px rgba(15,26,46,.06);--tip-shadow:0 6px 24px rgba(15,26,46,.16);--float:0 1px 2px rgba(15,26,46,.1),0 4px 14px rgba(15,26,46,.1);
 }
 /* dark: set on <html> by the head script (saved choice, else the system setting) */
 :root[data-theme=dark]{color-scheme:dark;
@@ -16,7 +16,7 @@
   --eu:#e3a848;--eu-ink:#e3a848;--land:#18203a;--edge:#0c1120;--focus:#8ea2ff;
   /* dark: low recedes into the surface, high carries the light */
   --b0:#27325e;--b1:#34479a;--b2:#4f68c9;--b3:#8299ec;--b4:#cdd7fb;
-  --nodata:#161e33;--hatch:#465169;--ocean:#0f1830;--limb:#000000;--shadow:none;--tip-shadow:0 8px 24px rgba(0,0,0,.45);
+  --nodata:#161e33;--hatch:#465169;--ocean:#0f1830;--limb:#000000;--shadow:none;--tip-shadow:0 8px 24px rgba(0,0,0,.45);--float:0 2px 10px rgba(0,0,0,.5);
 }
 
 *{box-sizing:border-box}
@@ -48,10 +48,9 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .lang button{border:0;background:none;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;color:var(--muted)}
 .lang button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
 
-/* EU27 pulse: headline + the year selector drawn as the EU27 trend */
-.pulse{display:grid;grid-template-columns:1fr auto;gap:18px 20px;align-items:end;margin:28px 0 0;padding:20px 0 22px;
+/* EU27 pulse: headline + the timeline (play, then the year selector drawn as the EU27 trend) */
+.pulse{display:grid;gap:18px 20px;align-items:end;margin:28px 0 0;padding:20px 0 22px;
   border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.hero{grid-column:1/-1}
 .hero-ind{font-size:14px;font-weight:500;margin-bottom:6px;max-width:46ch}
 .hero-key{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted)}
 .eu-dot{width:8px;height:8px;border-radius:50%;background:var(--eu);flex:none}
@@ -64,6 +63,7 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
   background:none;border-radius:6px}
 .years .yv{font-size:11.5px;color:var(--muted)}
 .years .col{width:28px;background:var(--eu);opacity:.32;border-radius:3px 3px 0 0;transition:height .4s,opacity .2s}
+.timeline{display:flex;align-items:flex-end;gap:14px}
 .years .yl{font-size:13px;line-height:18px;font-weight:500;color:var(--muted);border-top:1px solid var(--line);width:100%;padding-top:4px;text-align:center}
 /* a year Eurostat didn't survey: no bar, a dashed stretch of axis */
 .years .ygap{display:flex;width:34px;padding-bottom:6px}
@@ -72,27 +72,34 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .ynote{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-12px;width:0;min-width:100%}
 .years button:hover .col{opacity:.55}
 .years button:disabled{opacity:.35;cursor:default}
-.play:disabled{opacity:.4;cursor:default}
 .years button[aria-pressed=true] .col{opacity:1}
 .years button[aria-pressed=true] .yl,.years button[aria-pressed=true] .yv{color:var(--ink);font-weight:700}
-.play{align-self:end;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border:1px solid var(--ink);
-  border-radius:999px;background:var(--ink);color:var(--paper);font-size:14px;font-weight:500}
+/* round play/pause at the start of the timeline; its centre lines up with the year labels */
+.play{flex:none;display:grid;place-items:center;width:36px;height:36px;margin-bottom:-3px;padding:0;border:1px solid var(--ink);
+  border-radius:50%;background:var(--ink);color:var(--paper)}
+.play svg{fill:currentColor}
+.play .i-play{margin-left:2px} /* optical centre of the triangle */
+.play .i-pause,.play[aria-pressed=true] .i-play{display:none}
+.play[aria-pressed=true] .i-pause{display:block}
 .play[aria-pressed=true]{background:transparent;color:var(--ink)}
+.play:disabled{opacity:.4;cursor:default}
 @media (min-width:760px){
-  .pulse{grid-template-columns:1fr auto auto;gap:24px 32px}
-  .hero{grid-column:auto}
-  .ynote{grid-column:2/-1;margin-top:-18px}
+  .pulse{grid-template-columns:1fr auto;gap:24px 32px}
+  .ynote{grid-column:2;margin-top:-18px}
 }
 
-.sizes-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 24px;margin:20px 0}
+/* filters: what to show (indicator, sector) and how to slice it (size); one row on wide screens */
+.filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 20px;align-items:end;margin:20px 0 16px}
+.ctl-size{grid-column:1/-1;justify-self:start} /* the size control keeps its own width */
+@media (min-width:1100px){
+  .filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
+  .ctl-size{grid-column:auto}
+}
 select{font:inherit;font-size:14px;font-weight:500;color:var(--ink);background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23808a9b' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center;
-  border:1px solid var(--line);border-radius:10px;padding:0 34px 0 12px;height:44px;min-width:300px;max-width:100%;appearance:none;cursor:pointer}
+  border:1px solid var(--line);border-radius:10px;padding:0 34px 0 12px;height:44px;width:100%;text-overflow:ellipsis;appearance:none;cursor:pointer}
 select:hover{border-color:var(--faint)}
-#sector{min-width:240px}
 .seg button:disabled{opacity:.4;cursor:default}
-.ctl-note{flex-basis:100%;margin-top:-6px;font-size:12.5px;color:var(--muted)}
-/* what to show on the first line, how to slice it on the second */
-.brk{flex-basis:100%;height:0}
+.ctl-note{grid-column:1/-1;margin-top:-6px;font-size:12.5px;color:var(--muted)}
 .seg{display:flex;flex-wrap:wrap;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
 .seg button{border:0;background:none;border-radius:7px;padding:7px 10px;font-size:14px;font-weight:500;color:var(--muted);min-height:36px;transition:background-color .2s,color .2s}
 .seg button small{font-size:12px;font-weight:400;color:var(--faint);margin-left:3px}
@@ -108,6 +115,9 @@ select:hover{border-color:var(--faint)}
 }
 .mapwrap,.rank{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
 .mapwrap{position:relative;margin:0;overflow:hidden}
+/* map / globe toggle floats over the top-right corner of the map */
+.mapwrap .views{position:absolute;top:12px;right:12px;z-index:2;border-color:transparent;box-shadow:var(--float)}
+.mapwrap .views button{min-height:30px;padding:4px 12px;font-size:13px}
 #map{display:block;width:100%;height:auto}
 .land{fill:var(--land);stroke:var(--edge);stroke-width:.5}
 .ctry{stroke:var(--edge);stroke-width:.7;cursor:pointer;outline:none;transition:fill .5s}
@@ -201,19 +211,16 @@ code{font-size:.92em}
 
 /* size filter: one even row on phones */
 @media (max-width:540px){
-  .sizes-row{display:grid;gap:14px}
-  .seg{display:grid;grid-template-columns:repeat(4,1fr)}
-  .seg button{display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:6px 2px}
-  .seg button small{margin:0}
+  .filters{grid-template-columns:1fr} .ctl-size{justify-self:stretch}
+  #sizes,#gapSort{display:grid;grid-template-columns:repeat(4,1fr)}
+  #sizes button{display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:6px 2px}
+  #sizes button small{margin:0}
   .rank .row,.euref,.prow{grid-template-columns:1.4em minmax(0,1fr) 32% 3.2em;gap:6px}
   .prow{grid-template-columns:minmax(0,1fr) 30% 3.2em}
-  #views{grid-template-columns:repeat(2,1fr)} #gapSort{grid-template-columns:repeat(3,1fr)}
+  #gapSort{grid-template-columns:repeat(3,1fr)}
   .gap-head{display:grid}
   .gap-row,.gap-axis{grid-template-columns:minmax(0,6.5rem) minmax(0,1fr) 4rem;gap:8px}
-  select,#sector{width:100%;min-width:0}
-  .brk{display:none}
-  .ctl-view{order:1} /* the sector note stays right under the size control it explains */
-  .years{gap:2px} .years button{flex:1 1 0;min-width:0;width:auto;max-width:56px} .years .ygap{flex:0 0 28px}
+  .timeline{gap:10px} .years{flex:1;min-width:0;gap:2px} .years button{flex:1 1 0;min-width:0;width:auto;max-width:56px} .years .ygap{flex:0 0 28px}
   /* language and theme get their own row so the title keeps the full width */
   .top{grid-template-columns:1fr} .prefs{order:-1;justify-self:end;margin:0}
 }
@@ -224,8 +231,8 @@ code{font-size:.92em}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}}
 /* backwards, not both: once finished the animation leaves nothing behind, so the
    sections don't stay on their own GPU layers (that caused a flash on filter clicks) */
-.top,.pulse,.sizes-row,.mapwrap,.rank,.series{animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards}
-.pulse{animation-delay:.08s} .sizes-row{animation-delay:.14s} .mapwrap{animation-delay:.2s} .rank{animation-delay:.26s} .series{animation-delay:.32s}
+.top,.pulse,.filters,.mapwrap,.rank,.series{animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards}
+.pulse{animation-delay:.08s} .filters{animation-delay:.14s} .mapwrap{animation-delay:.2s} .rank{animation-delay:.26s} .series{animation-delay:.32s}
 .years .col{transition:height .55s cubic-bezier(.2,.7,.2,1),opacity .2s}
 .tip:not([hidden]){animation:pop .14s ease-out}
 @keyframes pop{from{opacity:0;transform:translateY(3px)}}
@@ -260,4 +267,4 @@ code{font-size:.92em}
 .eu-tick{display:inline-block;width:2px;height:12px;background:var(--eu);border-radius:1px}
 @media (max-width:540px){.prow{grid-template-columns:minmax(0,1fr) 30% 3.2em;gap:6px}}
 @media (max-width:540px){.prow{padding:5px 6px}}
-@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.theme{width:42px;height:42px}.back{min-height:40px;padding:0 16px}.prow{min-height:40px}}
+@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.theme,.play{width:42px;height:42px}.play{margin-bottom:-6px}.back{min-height:40px;padding:0 16px}.prow{min-height:40px}}
