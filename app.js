@@ -33,7 +33,7 @@ const T = {
     title: "How fast is AI spreading through European businesses?",
     sub: "Share of enterprises (10+ employees) using at least one AI technology. Source: Eurostat.",
     year: "Year", size: "Company size", indicator: "Indicator", view: "View", map: "Map", globe: "Globe",
-    playYears: "Play through the years", skipped: (y) => `No data for ${y}: Eurostat's survey had no AI questions that year.`,
+    play: "Play", pause: "Pause", skipped: (y) => `No data for ${y}: Eurostat's survey had no AI questions that year.`,
     sector: "Sector", sectorAll: "All sectors", bySector: "By sector",
     sectors: { C: "Manufacturing", D_E: "Energy, water and waste", F: "Construction", G: "Wholesale and retail trade",
       H: "Transport and storage", I: "Accommodation and food services", J: "Information and communication", L: "Real estate",
@@ -85,7 +85,7 @@ const T = {
     title: "Quanto velocemente si diffonde l'AI nelle imprese europee?",
     sub: "Quota di imprese (10+ addetti) che usano almeno una tecnologia di AI. Fonte: Eurostat.",
     year: "Anno", size: "Dimensione d'impresa", indicator: "Indicatore", view: "Vista", map: "Mappa", globe: "Globo",
-    playYears: "Riproduci gli anni", skipped: (y) => `Nessun dato per il ${y}: quell'anno l'indagine Eurostat non conteneva domande sull'AI.`,
+    play: "Riproduci", pause: "Pausa", skipped: (y) => `Nessun dato per il ${y}: quell'anno l'indagine Eurostat non conteneva domande sull'AI.`,
     sector: "Settore", sectorAll: "Tutti i settori", bySector: "Per settore",
     sectors: { C: "Manifattura", D_E: "Energia, acqua e rifiuti", F: "Costruzioni", G: "Commercio all'ingrosso e al dettaglio",
       H: "Trasporti e magazzinaggio", I: "Alloggio e ristorazione", J: "Informazione e comunicazione", L: "Attività immobiliari",
@@ -209,7 +209,7 @@ function setLang(l) {
     (b.innerHTML = `${t.sizes[b.dataset.s]}<small>${SIZE_RANGE[b.dataset.s]}</small>`));
   document.querySelectorAll("#views button").forEach((b) => (b.textContent = t[b.dataset.v]));
   $("views").setAttribute("aria-label", t.view); // no visible label: the toggle sits on the map it switches
-  Object.assign($("play"), { title: t.playYears, ariaLabel: t.playYears }); // the icon shows play or pause
+  syncPlay();
   syncTheme();
   Object.assign($("yearNote"), { hidden: !SKIPPED.length, textContent: SKIPPED.length ? t.skipped(SKIPPED.join(", ")) : "" });
   $("ind").innerHTML = GROUPS.map((g) => `<optgroup label="${t.groups[g.id]}">` +
@@ -582,7 +582,9 @@ function render() {
 
 // ---- controls ----
 let timer = null;
-function stop() { clearInterval(timer); timer = null; $("play").setAttribute("aria-pressed", false); render(); }
+// the label says what a click does: "Play", or "Pause" while playing (filled)
+function syncPlay() { $("play").classList.toggle("on", !!timer); $("playTxt").textContent = timer ? t.pause : t.play; }
+function stop() { clearInterval(timer); timer = null; syncPlay(); render(); }
 function set(patch) {
   const opened = patch.c && patch.c !== state.c, closed = "c" in patch && !patch.c && state.c;
   const prevC = state.c, viewChanged = patch.v && patch.v !== state.v;
@@ -602,13 +604,13 @@ document.querySelector(".lang").addEventListener("click", (e) => {
 $("play").addEventListener("click", () => {
   if (timer) return stop();
   const ys = yearsOf(state.i);
-  $("play").setAttribute("aria-pressed", true);
   timer = setInterval(() => {
     const k = ys.indexOf(state.y);
     if (k >= ys.length - 1) return stop();
     set({ y: ys[k + 1] });
     if (k + 1 === ys.length - 1) stop();
   }, STEP_MS);
+  syncPlay();
   if (state.y === ys.at(-1)) set({ y: ys[0] }); else render();
 });
 addEventListener("hashchange", () => { const v = state.v; readHash(); setLang(state.l); render(); if (state.v !== v) draw(); });

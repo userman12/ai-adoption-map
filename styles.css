@@ -48,7 +48,7 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .lang button{border:0;background:none;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;color:var(--muted)}
 .lang button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
 
-/* EU27 pulse: headline + the timeline (play, then the year selector drawn as the EU27 trend) */
+/* EU27 pulse: headline + the year selector drawn as the EU27 trend */
 .pulse{display:grid;gap:18px 20px;align-items:end;margin:28px 0 0;padding:20px 0 22px;
   border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .hero-ind{font-size:14px;font-weight:500;margin-bottom:6px;max-width:46ch}
@@ -58,12 +58,15 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .hero-delta{font-size:14px;color:var(--muted)}
 .hero-delta b{color:var(--ink);font-weight:500}
 .ctl-lbl{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px}
+/* the year chart keeps its own width, so its header spans exactly the bars */
+.years-wrap{justify-self:start}
+.years-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.years-head .ctl-lbl{margin:0}
 .years{display:flex;gap:6px;align-items:flex-end}
 .years button{display:flex;flex-direction:column;align-items:center;gap:4px;width:56px;padding:4px 0 6px;border:0;
   background:none;border-radius:6px}
 .years .yv{font-size:11.5px;color:var(--muted)}
 .years .col{width:28px;background:var(--eu);opacity:.32;border-radius:3px 3px 0 0;transition:height .4s,opacity .2s}
-.timeline{display:flex;align-items:flex-end;gap:14px}
 .years .yl{font-size:13px;line-height:18px;font-weight:500;color:var(--muted);border-top:1px solid var(--line);width:100%;padding-top:4px;text-align:center}
 /* a year Eurostat didn't survey: no bar, a dashed stretch of axis */
 .years .ygap{display:flex;width:34px;padding-bottom:6px}
@@ -74,14 +77,14 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .years button:disabled{opacity:.35;cursor:default}
 .years button[aria-pressed=true] .col{opacity:1}
 .years button[aria-pressed=true] .yl,.years button[aria-pressed=true] .yv{color:var(--ink);font-weight:700}
-/* round play/pause at the start of the timeline; its centre lines up with the year labels */
-.play{flex:none;display:grid;place-items:center;width:36px;height:36px;margin-bottom:-3px;padding:0;border:1px solid var(--ink);
-  border-radius:50%;background:var(--ink);color:var(--paper)}
+/* play/pause: the year chart's one action, in its header; filled while playing, like a selected control */
+.play{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 10px;border:1px solid var(--line);
+  border-radius:999px;background:var(--panel);color:var(--ink);font-size:13px;font-weight:500}
+.play:hover:not(:disabled){border-color:var(--faint)}
 .play svg{fill:currentColor}
-.play .i-play{margin-left:2px} /* optical centre of the triangle */
-.play .i-pause,.play[aria-pressed=true] .i-play{display:none}
-.play[aria-pressed=true] .i-pause{display:block}
-.play[aria-pressed=true]{background:transparent;color:var(--ink)}
+.play .i-pause,.play.on .i-play{display:none}
+.play.on .i-pause{display:block}
+.play.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .play:disabled{opacity:.4;cursor:default}
 @media (min-width:760px){
   .pulse{grid-template-columns:1fr auto;gap:24px 32px}
@@ -220,7 +223,7 @@ code{font-size:.92em}
   #gapSort{grid-template-columns:repeat(3,1fr)}
   .gap-head{display:grid}
   .gap-row,.gap-axis{grid-template-columns:minmax(0,6.5rem) minmax(0,1fr) 4rem;gap:8px}
-  .timeline{gap:10px} .years{flex:1;min-width:0;gap:2px} .years button{flex:1 1 0;min-width:0;width:auto;max-width:56px} .years .ygap{flex:0 0 28px}
+  .years-wrap{justify-self:stretch} .years{gap:2px} .years button{flex:1 1 0;min-width:0;width:auto} .years .ygap{flex:0 0 28px}
   /* language and theme get their own row so the title keeps the full width */
   .top{grid-template-columns:1fr} .prefs{order:-1;justify-self:end;margin:0}
 }
@@ -267,4 +270,4 @@ code{font-size:.92em}
 .eu-tick{display:inline-block;width:2px;height:12px;background:var(--eu);border-radius:1px}
 @media (max-width:540px){.prow{grid-template-columns:minmax(0,1fr) 30% 3.2em;gap:6px}}
 @media (max-width:540px){.prow{padding:5px 6px}}
-@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.theme,.play{width:42px;height:42px}.play{margin-bottom:-6px}.back{min-height:40px;padding:0 16px}.prow{min-height:40px}}
+@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.theme{width:42px;height:42px}.play{height:40px;padding:0 16px 0 14px}.back{min-height:40px;padding:0 16px}.prow{min-height:40px}}

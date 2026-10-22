@@ -42,15 +42,16 @@
     <p class="hero-delta" id="heroDelta"></p>
   </div>
   <div class="years-wrap">
-    <p class="ctl-lbl" id="yearLbl" data-i18n="year"></p>
-    <!-- play sits at the start of the timeline, like a media player -->
-    <div class="timeline">
-      <button class="play" id="play" aria-pressed="false">
-        <svg class="i-play" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M5.5 3.1v9.8a.6.6 0 0 0 .92.5l7.5-4.9a.6.6 0 0 0 0-1L6.42 2.6a.6.6 0 0 0-.92.5z"/></svg>
-        <svg class="i-pause" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="3.5" y="3" width="3" height="10" rx="1"/><rect x="9.5" y="3" width="3" height="10" rx="1"/></svg>
+    <!-- header of the year chart: its label on the left, its one action on the right -->
+    <div class="years-head">
+      <p class="ctl-lbl" id="yearLbl" data-i18n="year"></p>
+      <button class="play" id="play" type="button">
+        <svg class="i-play" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 1.4v9.2a.7.7 0 0 0 1.06.6l7.6-4.6a.7.7 0 0 0 0-1.2L3.56.8a.7.7 0 0 0-1.06.6z"/></svg>
+        <svg class="i-pause" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" rx=".8"/><rect x="7" y="1.5" width="3" height="9" rx=".8"/></svg>
+        <span id="playTxt"></span>
       </button>
-      <div class="years" id="years" role="group" aria-labelledby="yearLbl" aria-describedby="yearNote"></div>
     </div>
+    <div class="years" id="years" role="group" aria-labelledby="yearLbl" aria-describedby="yearNote"></div>
   </div>
   <p class="ynote" id="yearNote" hidden></p>
 </section>
