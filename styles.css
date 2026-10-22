@@ -5,17 +5,17 @@
 /* Palette: cool paper, navy ink, an indigo ramp for magnitude (low -> high),
    and one amber reserved for the EU27 benchmark wherever it appears. */
 :root{
-  --paper:#f5f6f8;--panel:#ffffff;--ink:#0f1a2e;--muted:#4f5a6c;--faint:#6f7889;--line:#e1e5ec;
-  --eu:#b7791f;--land:#e7eaf0;--edge:#ffffff;--focus:#2546d6;
+  --paper:#f5f6f8;--panel:#ffffff;--ink:#0f1a2e;--muted:#4f5a6c;--faint:#646d7e;--line:#e1e5ec;
+  --eu:#b7791f;--eu-ink:#94600f;--land:#e7eaf0;--edge:#ffffff;--focus:#2546d6;
   --b0:#e2e7f6;--b1:#b1bdea;--b2:#7b8fd9;--b3:#4a5fc1;--b4:#22328c;
-  --nodata:#eef0f4;--hatch:#a6aebb;--ocean:#e2e9f4;--limb:#0f1a2e;--shadow:0 1px 2px rgba(15,26,46,.06),0 8px 24px rgba(15,26,46,.06);
+  --nodata:#eef0f4;--hatch:#a6aebb;--ocean:#e2e9f4;--limb:#0f1a2e;--shadow:0 1px 2px rgba(15,26,46,.06),0 8px 24px rgba(15,26,46,.06);--tip-shadow:0 6px 24px rgba(15,26,46,.16);
 }
 @media (prefers-color-scheme:dark){:root{
   --paper:#0c1120;--panel:#121a2c;--ink:#e7ebf3;--muted:#a3adbf;--faint:#7f899c;--line:#222c41;
-  --eu:#e3a848;--land:#18203a;--edge:#0c1120;--focus:#8ea2ff;
+  --eu:#e3a848;--eu-ink:#e3a848;--land:#18203a;--edge:#0c1120;--focus:#8ea2ff;
   /* dark: low recedes into the surface, high carries the light */
   --b0:#27325e;--b1:#34479a;--b2:#4f68c9;--b3:#8299ec;--b4:#cdd7fb;
-  --nodata:#161e33;--hatch:#465169;--ocean:#0f1830;--limb:#000000;--shadow:none;
+  --nodata:#161e33;--hatch:#465169;--ocean:#0f1830;--limb:#000000;--shadow:none;--tip-shadow:0 8px 24px rgba(0,0,0,.45);
 }}
 
 *{box-sizing:border-box}
@@ -27,13 +27,16 @@ a{color:inherit;text-decoration:underline;text-decoration-color:var(--faint);tex
 a:hover{text-decoration-color:var(--ink)}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
 button{font:inherit;color:inherit;cursor:pointer}
+:root{accent-color:var(--b3);scrollbar-color:var(--line) transparent}
+::selection{background:color-mix(in srgb,var(--b2) 35%,transparent)}
+h1,h2,h3{text-wrap:balance} p{text-wrap:pretty}
 
-.eyebrow{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 
 /* header */
 .top{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 16px}
-.top h1,.top .sub{grid-column:1/-1}
-h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spacing:-.025em;margin:6px 0 0;max-width:20ch}
+.top .sub{grid-column:1/-1}
+.top .lang{align-self:start;margin-top:6px}
+h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spacing:-.025em;margin:0;max-width:20ch}
 .sub{color:var(--muted);max-width:58ch;font-size:15.5px}
 .lang{display:flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--panel)}
 .lang button{border:0;background:none;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;color:var(--muted)}
@@ -100,7 +103,7 @@ select:hover{border-color:var(--faint)}
 .hatch-bg{fill:var(--nodata)} .hatch-line{stroke:var(--hatch);stroke-width:1}
 
 .tip{position:absolute;z-index:5;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;
-  padding:9px 12px;font-size:13px;line-height:1.45;box-shadow:0 6px 24px rgba(15,26,46,.16);min-width:150px;max-width:230px}
+  padding:9px 12px;font-size:13px;line-height:1.45;box-shadow:var(--tip-shadow);min-width:150px;max-width:230px}
 .tip b{font-weight:700;font-size:14px}
 .tip .v{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
 .tip .m{color:var(--muted)}
@@ -114,7 +117,7 @@ select:hover{border-color:var(--faint)}
 .nd{display:inline-flex;align-items:center;gap:6px}
 .nd i{width:14px;height:8px;border-radius:2px;background:repeating-linear-gradient(45deg,var(--nodata) 0 2px,var(--hatch) 2px 3px)}
 
-.tag{flex:none;font-size:10.5px;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:6px;white-space:nowrap}
+.tag{flex:none;font-size:11px;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:6px;white-space:nowrap}
 
 .rank{padding:16px 18px}
 .rank h2{font-size:14px;font-weight:700;margin:0 0 10px;letter-spacing:-.005em}
@@ -132,11 +135,12 @@ select:hover{border-color:var(--faint)}
 .rank .bar i{position:absolute;inset:0 auto 0 0;background:var(--b3);border-radius:0 2px 2px 0}
 .rank .bar .eu{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--eu);border-radius:1px}
 .rank .val{text-align:right;font-weight:500}
-.rank abbr{text-decoration:none;color:var(--eu);cursor:help}
-.euref{color:var(--eu);font-weight:500;border-bottom:1px solid var(--line);margin-bottom:6px;padding:4px 0 8px}
+.rank abbr{text-decoration:none;color:var(--eu-ink);cursor:help}
+.euref{color:var(--eu-ink);font-weight:500;border-bottom:1px solid var(--line);margin-bottom:6px;padding:4px 0 8px}
 .euref .nm{gap:8px}
 .note{font-size:12.5px;color:var(--muted);margin-top:12px}
 
+.series h2{font-size:15px;font-weight:700;margin:0}
 .series{margin:32px 0 0;padding:20px 0;border-top:1px solid var(--line);display:grid;gap:6px;max-width:72ch}
 .ft{font-size:13px;color:var(--muted);margin-top:24px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:4px}
 code{font-size:.92em}
@@ -153,6 +157,7 @@ code{font-size:.92em}
   .prow{grid-template-columns:minmax(0,1fr) 30% 3.2em}
   #views{grid-template-columns:repeat(2,1fr)}
   select{width:100%;min-width:0}
+  .years{gap:2px} .years button{width:46px}
 }
 
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -190,8 +195,9 @@ code{font-size:.92em}
 .prow .bar i{position:absolute;inset:0 auto 0 0;background:var(--b3);border-radius:2px}
 .prow .bar .eu{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--eu);border-radius:1px}
 .prow .val{text-align:right;font-weight:500}
-.prow abbr{text-decoration:none;color:var(--eu)}
+.prow abbr{text-decoration:none;color:var(--eu-ink)}
 .cp-key{display:flex;align-items:center;gap:6px}
 .eu-tick{display:inline-block;width:2px;height:12px;background:var(--eu);border-radius:1px}
 @media (max-width:540px){.prow{grid-template-columns:minmax(0,1fr) 30% 3.2em;gap:6px}}
 @media (max-width:540px){.prow .pl{white-space:normal;line-height:1.3}.prow{padding:5px 6px}}
+@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.back{min-height:40px;padding:0 16px}.prow{min-height:40px}}

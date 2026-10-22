@@ -26,7 +26,6 @@ const IND = Object.fromEntries(GROUPS.flatMap((g) => g.items.map((k) => [k, g]))
 
 const T = {
   en: {
-    eyebrow: "AI in European business · Eurostat",
     title: "How fast is AI spreading through European businesses?",
     sub: "Share of enterprises (10+ employees) using at least one AI technology. Source: Eurostat.",
     year: "Year", size: "Company size", indicator: "Indicator", view: "View", map: "Map", globe: "Globe",
@@ -59,7 +58,6 @@ const T = {
     },
   },
   it: {
-    eyebrow: "L'AI nelle imprese europee · Eurostat",
     title: "Quanto velocemente si diffonde l'AI nelle imprese europee?",
     sub: "Quota di imprese (10+ addetti) che usano almeno una tecnologia di AI. Fonte: Eurostat.",
     year: "Anno", size: "Dimensione d'impresa", indicator: "Indicatore", view: "Vista", map: "Mappa", globe: "Globo",
