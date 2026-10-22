@@ -70,13 +70,15 @@ for (const [d, c] of Object.entries(FILTER)) {
   if (!ai.codes(d).includes(c)) throw new Error(`Code ${c} not found in dimension ${d}`);
 }
 const main = ai.extract(FILTER.indic_is, FILTER.unit);
-const more = Object.fromEntries(Object.entries(MORE).map(([k, { code, unit }]) => [k, { code, unit, ...ai.extract(code, unit) }]));
+// label: Eurostat's own wording of each indicator (English only), shown in the app as the official definition
+const more = Object.fromEntries(Object.entries(MORE).map(([k, { code, unit }]) => [k, { code, unit, label: ai.label('indic_is', code), ...ai.extract(code, unit) }]));
 write('ai-adoption.json', {
   source: 'Eurostat, isoc_eb_ai',
   sourceUrl: 'https://ec.europa.eu/eurostat/databrowser/view/isoc_eb_ai/default/table',
   extractedAt: today,
   datasetUpdated: ai.j.updated,
   indicator: 'Enterprises using at least one AI technology (% of enterprises)',
+  label: ai.label('indic_is', FILTER.indic_is),
   codes: { ...FILTER, size_emp: SIZES },
   flagLabels: ai.j.extension?.status?.label ?? {},
   years: main.years,

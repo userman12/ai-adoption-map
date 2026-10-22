@@ -4,6 +4,7 @@
  "extractedAt": "2026-10-22",
  "datasetUpdated": "2026-06-15T11:00:00+0200",
  "indicator": "Enterprises using at least one AI technology (% of enterprises)",
+ "label": "Enterprises using at least one of the AI technologies: AI_TTM, AI_TSR, AI_TNLG, AI_TIR, AI_TML, AI_TPA, AI_TAR, E_AI_TPVSG",
  "codes": {
   "freq": "A",
   "nace_r2": "C10-S951_X_K",
@@ -962,6 +963,7 @@
   "ttm": {
    "code": "E_AI_TTM",
    "unit": "PC_ENT",
+   "label": "Enterprises using AI technologies performing analysis of written language (text mining)",
    "years": [
     2021,
     2023,
@@ -1885,6 +1887,7 @@
   "tsr": {
    "code": "E_AI_TSR",
    "unit": "PC_ENT",
+   "label": "Enterprises using AI technologies converting spoken language into machine-readable format (speech recognition)",
    "years": [
     2021,
     2023,
@@ -2805,6 +2808,7 @@
   "tnlg": {
    "code": "E_AI_TNLG",
    "unit": "PC_ENT",
+   "label": "Enterprises using AI technologies generating written or spoken language or programming codes (natural language generation, speech synthesis)",
    "years": [
     2021,
     2023,
@@ -3736,6 +3740,7 @@
   "tir": {
    "code": "E_AI_TIR",
    "unit": "PC_ENT",
+   "label": "Enterprises using AI technologies identifying objects or persons based on images (image recognition, image processing)",
    "years": [
     2021,
     2023,
@@ -4661,6 +4666,7 @@
   "tml": {
    "code": "E_AI_TML",
    "unit": "PC_ENT",
+   "label": "Enterprises using machine learning (e.g. deep learning) for data analysis",
    "years": [
     2021,
     2023,
@@ -5574,6 +5580,7 @@
   "tpa": {
    "code": "E_AI_TPA",
    "unit": "PC_ENT",
+   "label": "Enterprises using AI technologies automating different workflows or assisting in decision making (AI based software robotic process automation)",
    "years": [
     2021,
     2023,
@@ -6503,6 +6510,7 @@
   "tar": {
    "code": "E_AI_TAR",
    "unit": "PC_ENT",
+   "label": "Enterprises using AI technologies enabling physical movement of machines via autonomous decisions based on observation of surroundings (autonomous robots, self-driving vehicles, autonomous drones)",
    "years": [
     2021,
     2023,
@@ -7416,6 +7424,7 @@
   "tpvsg": {
    "code": "E_AI_TPVSG",
    "unit": "PC_ENT",
+   "label": "Enterprises using AI technologies generating pictures, videos, sound/audio",
    "years": [
     2025
    ],
@@ -7911,6 +7920,7 @@
   "tge2": {
    "code": "E_AI_TGE2",
    "unit": "PC_ENT",
+   "label": "Enterprises using at least two of the AI technologies: AI_TTM, AI_TSR, AI_TNLG, AI_TIR, AI_TML, AI_TPA, AI_TAR, E_AI_TPVSG",
    "years": [
     2021,
     2023,
@@ -8823,6 +8833,7 @@
   "tge3": {
    "code": "E_AI_TGE3",
    "unit": "PC_ENT",
+   "label": "Enterprises using at least three of the AI technologies: AI_TTM, AI_TSR, AI_TNLG, AI_TIR, AI_TML, AI_TPA, AI_TAR, E_AI_TPVSG",
    "years": [
     2021,
     2023,
@@ -9734,6 +9745,7 @@
   "pms": {
    "code": "E_AI_PMS",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises using AI technologies for marketing or sales",
    "years": [
     2021,
     2023,
@@ -10654,6 +10666,7 @@
   "ppp": {
    "code": "E_AI_PPP",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises using AI technologies for production processes",
    "years": [
     2021,
     2023,
@@ -11564,6 +11577,7 @@
   "pbam": {
    "code": "E_AI_PBAM",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises using AI technologies for organisation of business administration processes or management",
    "years": [
     2023,
     2024,
@@ -12291,6 +12305,7 @@
   "pfin": {
    "code": "E_AI_PFIN",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises using AI technologies for accounting, controlling or finance management",
    "years": [
     2023,
     2024,
@@ -13010,6 +13025,7 @@
   "plog": {
    "code": "E_AI_PLOG",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises using AI technologies for logistics",
    "years": [
     2021,
     2023,
@@ -13916,6 +13932,7 @@
   "pits": {
    "code": "E_AI_PITS",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises using AI technologies for ICT security",
    "years": [
     2021,
     2023,
@@ -14815,6 +14832,7 @@
   "prdi": {
    "code": "E_AI_PRDI",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises using AI technologies for research and development (R&D) or innovation activity",
    "years": [
     2023,
     2024,
@@ -15543,6 +15561,7 @@
   "ardy": {
    "code": "E_AI_ARDY",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises' AI technologies were commercial software or systems ready to use",
    "years": [
     2021,
     2023,
@@ -16204,6 +16223,7 @@
   "amown": {
    "code": "E_AI_AMOWN",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises' AI technologies were commercial software or systems modified by own employees",
    "years": [
     2021,
     2023,
@@ -16875,6 +16895,7 @@
   "aos": {
    "code": "E_AI_AOS",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises' AI technologies were open-source software or systems modified by own employees",
    "years": [
     2021,
     2023,
@@ -17542,6 +17563,7 @@
   "adown": {
    "code": "E_AI_ADOWN",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises' AI technologies were developed by own employees",
    "years": [
     2021,
     2023,
@@ -18199,6 +18221,7 @@
   "aext": {
    "code": "E_AI_AEXT",
    "unit": "PC_ENT_AI_TANY",
+   "label": "Enterprises' AI technologies were  developed or modified by external providers",
    "years": [
     2021,
     2023,
@@ -18864,6 +18887,7 @@
   "ec": {
    "code": "E_AI_EC",
    "unit": "PC_ENT_AI_TX",
+   "label": "Enterprises that ever considered to use one of the AI technologies: AI_TTM, AI_TSR, AI_TNLG, AI_TIR, AI_TML, AI_TPA, AI_TAR, E_AI_TPVSG",
    "years": [
     2021,
     2023,
@@ -19524,6 +19548,7 @@
   "bcst": {
    "code": "E_AI_BCST",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because the costs seem too high",
    "years": [
     2021,
     2023,
@@ -20171,6 +20196,7 @@
   "ble": {
    "code": "E_AI_BLE",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because of a lack of relevant expertise",
    "years": [
     2021,
     2023,
@@ -20819,6 +20845,7 @@
   "binc": {
    "code": "E_AI_BINC",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because of incompatibility with existing equipment, software or systems",
    "years": [
     2021,
     2023,
@@ -21462,6 +21489,7 @@
   "bddt": {
    "code": "E_AI_BDDT",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because of difficulties with availability or quality of the necessary data",
    "years": [
     2021,
     2023,
@@ -22109,6 +22137,7 @@
   "bcdp": {
    "code": "E_AI_BCDP",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because of concerns regarding violation of data protection and privacy",
    "years": [
     2021,
     2023,
@@ -22756,6 +22785,7 @@
   "bleg": {
    "code": "E_AI_BLEG",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because of a lack of clarity about the legal consequences",
    "years": [
     2021,
     2023,
@@ -23403,6 +23433,7 @@
   "bec": {
    "code": "E_AI_BEC",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because of ethical considerations",
    "years": [
     2021,
     2023,
@@ -24049,6 +24080,7 @@
   "bnu": {
    "code": "E_AI_BNU",
    "unit": "PC_ENT_AI_EC",
+   "label": "Enterprises do not use AI technologies, because artificial Intelligence technologies are not useful for Enterprise",
    "years": [
     2021,
     2023,
@@ -24693,6 +24725,7 @@
   "dvlo": {
    "code": "E_DI3_VLO_AI_TANY",
    "unit": "PC_ENT",
+   "label": "Enterprises with very low digital intensity index, which use any artificial intelligence technology",
    "years": [
     2023,
     2025
@@ -25282,6 +25315,7 @@
   "dlo": {
    "code": "E_DI3_LO_AI_TANY",
    "unit": "PC_ENT",
+   "label": "Enterprises with low digital intensity index, which use any artificial intelligence technology",
    "years": [
     2023,
     2025
@@ -25893,6 +25927,7 @@
   "dhi": {
    "code": "E_DI3_HI_AI_TANY",
    "unit": "PC_ENT",
+   "label": "Enterprises with high digital intensity index, which use any artificial intelligence technology",
    "years": [
     2023,
     2025
@@ -26511,6 +26546,7 @@
   "dvhi": {
    "code": "E_DI3_VHI_AI_TANY",
    "unit": "PC_ENT",
+   "label": "Enterprises with very high digital intensity index, which use any artificial intelligence technology",
    "years": [
     2023,
     2025

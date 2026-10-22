@@ -14,6 +14,12 @@ const NUM = {
 };
 const EU = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split(" "));
 const STEP_MS = 1500;
+const MAXK = 4; // countries in a comparison
+const SITE_URL = "https://userman12.github.io/ai-adoption-map/";
+// Eurostat's own definition of AI (Statistics Explained), quoted in the indicator dialog
+const AI_DEF = "AI refers to systems that use technologies such as text mining, computer vision, speech recognition, natural language generation and speech synthesis, machine learning or deep learning. These technologies can be used to gather and/or use data to predict, recommend or decide, with varying levels of autonomy, the best action to achieve specific goals.";
+const AI_DEF_URL = "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Use_of_artificial_intelligence_in_enterprises";
+const META_URL = "https://ec.europa.eu/eurostat/cache/metadata/en/isoc_e_esms.htm";
 
 // Indicator groups, in display order. "base" = what the percentage is a share of.
 const GROUPS = [
@@ -27,6 +33,10 @@ const GROUPS = [
 const IND = Object.fromEntries(GROUPS.flatMap((g) => g.items.map((k) => [k, g])));
 // items whose percentage has another base than their group: "considered using AI" is a share of non-users
 const baseOf = (k) => ({ ec: "nonUsers" })[k] ?? IND[k].base;
+
+// Italian elides the article before numbers read with a vowel: l'8%, l'11%, l'80%, but il 7%, il 20%
+const vow = (v) => { const k = parseInt(v, 10); return k === 1 || k === 8 || k === 11 || (k >= 80 && k < 90); };
+const il = (v) => (vow(v) ? `l'${v}` : `il ${v}`), dal = (v) => (vow(v) ? `dall'${v}` : `dal ${v}`), al = (v) => (vow(v) ? `all'${v}` : `al ${v}`);
 
 const T = {
   en: {
@@ -64,6 +74,40 @@ const T = {
     groupNote: {
       source: "Several answers are possible, so the shares can add up to more than 100%.",
       dii: "Digital intensity counts how many of 12 digital technologies and practices a business uses: very low 0–3, low 4–6, high 7–9, very high 10–12. Together the four levels make up the share of businesses using AI.",
+    },
+    // share, find, keyboard
+    shareView: "Copy a link to this view", copyLink: "Copy link", copied: "Link copied", copyFail: "Couldn't copy: use the address bar",
+    image: "Image", imageTip: "Download this profile as an image", saved: "Image saved", find: "Find a country", findNone: (q) => `No country matches “${q}”`,
+    keys: "Keyboard: <kbd>←</kbd> <kbd>→</kbd> change year · <kbd>Space</kbd> plays or pauses · <kbd>/</kbd> finds a country · <kbd>Esc</kbd> closes",
+    // indicator definition
+    define: "Definition", defOfficial: "Eurostat definition", defTechs: "Counts these technologies", defUnit: "Eurostat unit",
+    defYears: "Survey years", defCover: "Countries with a value", defCover2: (k, n, y, sc) => `${k} of ${n} in ${y} (${sc})`,
+    defCode: "Eurostat code", defAI: "What Eurostat means by AI", defArticle: "Eurostat article on AI in enterprises",
+    defMeta: "Survey methodology", defClose: "Close",
+    // country profile: trend and comparison
+    trend: "Trend", cmpAddThis: "Add to comparison", cmpDropThis: "Remove from comparison", cmpFullThis: "Comparison full",
+    cmpGo: (k) => `Go to the comparison (${k})`,
+    // compare countries
+    cmpTitle: "Compare countries", cmpHint: "Pick 2 to 4 countries to see them side by side on every indicator.",
+    cmpAdd: "Add a country", cmpFull: "Up to 4 countries", cmpTry: (names) => `Try ${names}`, cmpRemove: (c) => `Remove ${c}`,
+    cmpOne: "Add one more country to compare.",
+    // two indicators
+    xyTitle: "Two indicators, every country", xyX: "Horizontal axis", xyY: "Vertical axis",
+    xyHint: "Each dot is a country; the dashed amber lines mark the EU27. The chart describes, it doesn't explain: two indicators moving together doesn't mean one causes the other. Select a dot for the country profile.",
+    xyNone: (y) => `No country has both values for ${y}.`, xyYears: "Years with both:", xyMissing: "No data for:",
+    // data table
+    dataTitle: "Data table", csv: "Download CSV", country: "Country", code: "Code", notes: "Notes",
+    showTable: (n, a, b) => `Show the table: ${n} countries, ${a}–${b}`,
+    dataNote: "One decimal here; the CSV keeps every decimal Eurostat publishes.",
+    // guided tour
+    tour: "What the data says", tourN: (n) => `${n} steps`, tourPrev: "Back", tourNext: "Next", tourDone: "Done", tourClose: "Close the tour",
+    st: {
+      growth: (a, va, b, vb) => `In ${a}, ${va} of EU businesses with 10 or more employees used at least one AI technology. In ${b}, ${vb} did.`,
+      spread: (y, lo, loN, hi, hiN) => `In ${y} the share ranged from ${lo} (${loN}) to ${hi} (${hiN}) across the countries Eurostat surveys.`,
+      size: (y, l, s) => `In ${y}, ${l} of large enterprises (250+ employees) used AI, compared with ${s} of small ones (10–49). This chart shows the gap in every country.`,
+      sector: (y, hi, hiS, lo, loS) => `By sector, the EU27 share in ${y} ranged from ${lo} (${loS}) to ${hi} (${hiS}). The map now shows that sector.`,
+      tech: (y, k, v) => `The most widespread AI technology in ${y} was ${low(k)}: ${v} of EU businesses used it.`,
+      barrier: (y, k, v) => `Among businesses that considered AI but don't use it, the reason cited most in ${y} was ${low(k)} (${v}).`,
     },
     ind: {
       ardy: "Ready-to-use commercial AI", amown: "Commercial AI modified in-house", aos: "Open-source AI modified in-house",
@@ -117,6 +161,40 @@ const T = {
       source: "Sono possibili più risposte, quindi la somma delle quote può superare il 100%.",
       dii: "L'intensità digitale conta quante di 12 tecnologie e pratiche digitali usa un'impresa: molto bassa 0–3, bassa 4–6, alta 7–9, molto alta 10–12. Insieme, i quattro livelli formano la quota di imprese che usano l'AI.",
     },
+    // condivisione, ricerca, tastiera
+    shareView: "Copia il link a questa vista", copyLink: "Copia link", copied: "Link copiato", copyFail: "Copia non riuscita: usa la barra degli indirizzi",
+    image: "Immagine", imageTip: "Scarica questa scheda come immagine", saved: "Immagine salvata", find: "Cerca un paese", findNone: (q) => `Nessun paese corrisponde a “${q}”`,
+    keys: "Tastiera: <kbd>←</kbd> <kbd>→</kbd> cambia anno · <kbd>Spazio</kbd> avvia o ferma · <kbd>/</kbd> cerca un paese · <kbd>Esc</kbd> chiude",
+    // definizione dell'indicatore
+    define: "Definizione", defOfficial: "Definizione Eurostat (in inglese)", defTechs: "Tecnologie conteggiate", defUnit: "Unità Eurostat",
+    defYears: "Anni dell'indagine", defCover: "Paesi con un valore", defCover2: (k, n, y, sc) => `${k} su ${n} nel ${y} (${sc})`,
+    defCode: "Codice Eurostat", defAI: "Cosa intende Eurostat per AI (in inglese)", defArticle: "Articolo Eurostat sull'AI nelle imprese",
+    defMeta: "Metodologia dell'indagine", defClose: "Chiudi",
+    // scheda paese: andamento e confronto
+    trend: "Andamento", cmpAddThis: "Aggiungi al confronto", cmpDropThis: "Togli dal confronto", cmpFullThis: "Confronto pieno",
+    cmpGo: (k) => `Vai al confronto (${k})`,
+    // confronto tra paesi
+    cmpTitle: "Confronta i paesi", cmpHint: "Scegli da 2 a 4 paesi per vederli affiancati su tutti gli indicatori.",
+    cmpAdd: "Aggiungi un paese", cmpFull: "Al massimo 4 paesi", cmpTry: (names) => `Prova: ${names}`, cmpRemove: (c) => `Togli ${c}`,
+    cmpOne: "Aggiungi un altro paese per confrontarli.",
+    // due indicatori
+    xyTitle: "Due indicatori, tutti i paesi", xyX: "Asse orizzontale", xyY: "Asse verticale",
+    xyHint: "Ogni punto è un paese; le linee ambra tratteggiate segnano la UE27. Il grafico descrive, non spiega: due indicatori che vanno insieme non significano che uno causi l'altro. Seleziona un punto per la scheda del paese.",
+    xyNone: (y) => `Nessun paese ha entrambi i valori per il ${y}.`, xyYears: "Anni con entrambi:", xyMissing: "Nessun dato per:",
+    // tabella dei dati
+    dataTitle: "Tabella dei dati", csv: "Scarica CSV", country: "Paese", code: "Codice", notes: "Note",
+    showTable: (n, a, b) => `Mostra la tabella: ${n} paesi, ${a}–${b}`,
+    dataNote: "Qui un decimale; il CSV conserva tutti i decimali pubblicati da Eurostat.",
+    // visita guidata
+    tour: "Cosa dicono i dati", tourN: (n) => `${n} passaggi`, tourPrev: "Indietro", tourNext: "Avanti", tourDone: "Fine", tourClose: "Chiudi la visita",
+    st: {
+      growth: (a, va, b, vb) => `Nel ${a} usava almeno una tecnologia di AI ${il(va)} delle imprese UE con almeno 10 addetti. Nel ${b}, ${il(vb)}.`,
+      spread: (y, lo, loN, hi, hiN) => `Nel ${y}, tra i paesi coperti da Eurostat, la quota andava ${dal(lo)} (${loN}) ${al(hi)} (${hiN}).`,
+      size: (y, l, s) => `Nel ${y} usava l'AI ${il(l)} delle grandi imprese (250+ addetti) e ${il(s)} delle piccole (10–49). Questo grafico mostra il divario in ogni paese.`,
+      sector: (y, hi, hiS, lo, loS) => `Per settore, nel ${y} la quota UE27 andava ${dal(lo)} (${loS}) ${al(hi)} (${hiS}). Ora la mappa mostra quel settore.`,
+      tech: (y, k, v) => `Nel ${y} la tecnologia di AI più diffusa era «${k}»: la usava ${il(v)} delle imprese UE.`,
+      barrier: (y, k, v) => `Tra le imprese che hanno valutato l'AI ma non la usano, nel ${y} il motivo più citato era «${k}» (${v}).`,
+    },
     ind: {
       ardy: "AI commerciale pronta all'uso", amown: "AI commerciale modificata internamente", aos: "AI open source modificata internamente",
       adown: "AI sviluppata internamente", aext: "AI sviluppata o modificata da fornitori esterni",
@@ -156,6 +234,15 @@ const yearsOf = (i, n) => src(i, n).years.map(String);
 const prevYear = (i, y) => { const ys = yearsOf(i); return ys[ys.indexOf(y) - 1]; };
 // round half up on the decimal value (19.95 -> 20.0, as Eurostat publishes), not on its binary float
 const r1 = (v) => Math.round(Number((v * 10).toPrecision(12))) / 10;
+const low = (x) => x[0].toLocaleLowerCase(state.l) + x.slice(1); // a label used mid-sentence
+// icons for buttons built in JS (stroke icons, drawn with currentColor)
+const svgI = (d, cls = "") => `<svg${cls && ` class="${cls}"`} viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="${d}"/></svg>`;
+const ICON = {
+  link: svgI("M6.6 9.4a2.6 2.6 0 0 0 3.7 0l2.4-2.4a2.6 2.6 0 0 0-3.7-3.7l-.9.9M9.4 6.6a2.6 2.6 0 0 0-3.7 0L3.3 9a2.6 2.6 0 0 0 3.7 3.7l.9-.9", "i-link"),
+  ok: svgI("M3.5 8.5l3 3 6-7", "i-ok"),
+  img: svgI("M3.5 3h9a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM2.5 10.5l3.2-3.2 2.8 2.8 1.8-1.8 3.2 3.2"),
+  plus: svgI("M8 3.5v9M3.5 8h9"), minus: svgI("M3.5 8h9"), x: svgI("M4.5 4.5l7 7M11.5 4.5l-7 7"),
+};
 
 // Colour bins per indicator (and sector): four equal "nice" steps sized on the all-enterprises country
 // values, fixed across years and sizes so change is visible. For the headline indicator this gives 10/20/30/40.
@@ -174,7 +261,7 @@ const bin = (i, v) => scaleOf(i).bins.filter((b) => v >= b).length;
 
 // ---- state <-> hash ----
 const VIEWS = ["map", "globe"];
-const state = { y: ALL_YEARS.at(-1), s: "all", l: "en", i: "any", v: "map", c: null, n: "all" };
+const state = { y: ALL_YEARS.at(-1), s: "all", l: "en", i: "any", v: "map", c: null, n: "all", k: [], sx: "any", sy: "ble" };
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   state.n = SECTORS.includes(p.get("n")) ? p.get("n") : "all";
@@ -184,10 +271,14 @@ function readHash() {
   state.l = p.get("l") === "it" ? "it" : "en";
   state.v = VIEWS.includes(p.get("v")) ? p.get("v") : "map";
   state.c = covered.includes(p.get("c")) ? p.get("c") : null;
+  state.k = [...new Set((p.get("cmp") ?? "").split(","))].filter((c) => covered.includes(c)).slice(0, MAXK);
+  state.sx = p.get("sx") in IND ? p.get("sx") : "any";
+  state.sy = p.get("sy") in IND ? p.get("sy") : "ble";
 }
 function writeHash() {
-  const { y, s, l, i, v, c, n } = state;
-  const extra = [n !== "all" && `n=${n}`, i !== "any" && `i=${i}`, v !== "map" && `v=${v}`, c && `c=${c}`, l === "it" && "l=it"].filter(Boolean);
+  const { y, s, l, i, v, c, n, k, sx, sy } = state;
+  const extra = [n !== "all" && `n=${n}`, i !== "any" && `i=${i}`, v !== "map" && `v=${v}`, c && `c=${c}`, k.length && `cmp=${k.join(",")}`,
+    sx !== "any" && `sx=${sx}`, sy !== "ble" && `sy=${sy}`, l === "it" && "l=it"].filter(Boolean);
   history.replaceState(null, "", `#${[`y=${y}`, `s=${s}`, ...extra].join("&")}`);
 }
 
@@ -212,8 +303,16 @@ function setLang(l) {
   syncPlay();
   syncTheme();
   Object.assign($("yearNote"), { hidden: !SKIPPED.length, textContent: SKIPPED.length ? t.skipped(SKIPPED.join(", ")) : "" });
-  $("ind").innerHTML = GROUPS.map((g) => `<optgroup label="${t.groups[g.id]}">` +
+  const opts = GROUPS.map((g) => `<optgroup label="${t.groups[g.id]}">` +
     g.items.map((k) => `<option value="${k}">${t.ind[k]}</option>`).join("") + "</optgroup>").join("");
+  for (const id of ["ind", "xyX", "xyY"]) $(id).innerHTML = opts;
+  Object.assign($("find"), { placeholder: t.find, ariaLabel: t.find });
+  $("findList").innerHTML = covered.map(name).sort((a, b) => a.localeCompare(b, l)).map((x) => `<option value="${x}"></option>`).join("");
+  for (const [id, label] of [["share", t.shareView], ["defClose", t.defClose], ["tourClose", t.tourClose]]) Object.assign($(id), { title: label, ariaLabel: label });
+  $("cmpAdd").ariaLabel = t.cmpAdd;
+  $("keys").innerHTML = t.keys;
+  $("tourN").textContent = t.tourN(tourSteps().length);
+  if (tourK >= 0) paintStep();
   $("sector").innerHTML = SECTORS.map((n) => `<option value="${n}">${n === "all" ? t.sectorAll : t.sectors[n]}</option>`).join("");
   document.querySelectorAll("#gapSort button").forEach((b) => (b.textContent = t.sort[b.dataset.o]));
   $("gapKey").innerHTML = BANDS.map((s) => `<span><i class="dt ${s}"></i>${t.sizes[s]} <small>${SIZE_RANGE[s]}</small></span>`).join("");
@@ -353,8 +452,9 @@ ctry
   .on("blur", hideTip);
 svg.on("pointerdown", (e) => { if (!e.target.classList.contains("ctry")) hideTip(); });
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape") return;
-  if (gapFor) hideGapTip(); else if (tipFor) hideTip(); else if (state.c) set({ c: null });
+  if (e.key !== "Escape" || $("def").open) return; // the open dialog closes itself
+  if (gapFor) hideGapTip(); else if (xyFor) hideXYTip(); else if (tipFor) hideTip();
+  else if (tourK >= 0) endTour(); else if (state.c) set({ c: null });
 });
 // hovering a ranking row points at the country on the map (mouse only; on touch the list is just a list)
 d3.select("#rankList")
@@ -370,16 +470,56 @@ const prow = (attr, current, label, cv, ev, f, max, spoken = label) =>
   `${ev == null ? "" : `<span class="eu" style="left:${(ev / max) * 100}%"></span>`}</span>` +
   `<span class="val">${cv == null ? "–" : pct(cv)}${f ? `<abbr title="${t.note}: ${flagText(f)}">*</abbr>` : ""}</span></button></li>`;
 const ceil10 = (vals) => Math.ceil(Math.max(...vals) / 10) * 10;
+
+// trend of one country against the EU27 for the current indicator, size and sector
+const niceTop = (m) => d3.scaleLinear().domain([0, m || 1]).nice(4).domain()[1];
+function trendOf(c) {
+  const { i, s } = state, ys = yearsOf(i).map(Number);
+  const pts = (k) => ys.map((y) => [y, val(i, k, s, String(y))]).filter(([, v]) => v != null);
+  const cs = pts(c), es = pts("EU27");
+  if (ys.length < 2 || cs.length + es.length < 2) return null;
+  return { a: ys[0], b: ys.at(-1), top: niceTop(d3.max([...cs, ...es], (p) => p[1])), cs, es };
+}
+// consecutive points as segments; one that skips a year (2022, or a year a country has no value) is drawn dashed
+const segs = (p) => p.slice(1).map((q, k) => [p[k], q, q[0] - p[k][0] > 1]);
+const tleg = (c, y) => [[c, "c", name(c)], ["EU27", "e", t.eu]].map(([k, cl, nm]) => {
+  const v = val(state.i, k, state.s, y);
+  return `<span><i class="sw ${cl}"></i>${nm} <b>${v == null ? "–" : pct(v)}</b></span>`;
+}).join("") + `<span class="ty">${y}</span>`;
+function trendHtml(c) {
+  const tr = trendOf(c);
+  if (!tr) return "";
+  const { a, b, top, cs, es } = tr, ys = yearsOf(state.i);
+  const X = (y) => ((y - a) / (b - a)) * 100, Y = (v) => 100 - (v / top) * 100;
+  const d = (p, dashed) => segs(p).filter((g) => g[2] === dashed).map(([p0, p1]) => `M${X(p0[0])} ${Y(p0[1])}L${X(p1[0])} ${Y(p1[1])}`).join("");
+  const series = [["e", es], ["c", cs]]; // the country drawn last, on top
+  const seq = (p) => p.map(([y, v]) => `${y} ${pct(v)}`).join(", ");
+  return `<div class="trend" role="img" aria-label="${t.trend}. ${name(c)}: ${seq(cs)}. ${t.eu}: ${seq(es)}.">` +
+    `<div class="tplot"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path class="tgrid" d="M0 0H100M0 50H100M0 100H100"/>` +
+    series.map(([k, p]) => `<path class="tl ${k}" d="${d(p, false)}"/><path class="tl ${k} dash" d="${d(p, true)}"/>`).join("") + "</svg>" +
+    `<span class="ttop">${num(top)}%</span><span class="tguide" style="left:${X(+state.y)}%"></span>` +
+    series.map(([k, p]) => p.map(([y, v]) => `<i class="tdot ${k}${String(y) === state.y ? " on" : ""}" style="left:${X(y)}%;top:${Y(v)}%"></i>`).join("")).join("") +
+    `</div><div class="taxis" aria-hidden="true">` +
+    d3.range(a, b + 1).map((y) => `<span class="${String(y) === state.y ? "on" : ys.includes(String(y)) ? "" : "gap"}" style="left:${X(y)}%">${y}</span>`).join("") +
+    // hover a year to read its values below, click it to select it
+    `</div><div class="tcols" aria-hidden="true">${ys.map((y) => `<span class="tcol" data-y="${y}" style="left:${X(+y - 0.5)}%;width:${X(a + 1)}%"></span>`).join("")}</div>` +
+    `</div><p class="tleg" id="tleg">${tleg(c, state.y)}</p>`;
+}
 const desc = (f) => (a, b) => (f(b) ?? -1) - (f(a) ?? -1); // highest first, no data last
 function profileHtml(c) {
   const { y, s, i, n } = state;
   const v = val(i, c, s, y), eu = val(i, "EU27", s, y);
   const tag = EU.has(c) ? "" : `<span class="tag">${t.nonEU}</span>`;
-  const head = `<div class="cp-head"><button class="back" id="back" aria-label="${t.close}">${t.back}</button>` +
-    `<p class="cp-sub">${cap(scope())} · ${y}</p></div>` +
-    `<h2 class="cp-name" id="cpName" tabindex="-1">${name(c)}${tag}</h2>` +
+  const inK = state.k.includes(c), full = state.k.length >= MAXK && !inK;
+  const head = `<div class="cp-head"><button class="pill back" id="back" type="button" aria-label="${t.close}">${t.back}</button>` +
+    `<div class="cp-acts"><button class="pill" id="cpLink" type="button" title="${t.shareView}">${ICON.link}${ICON.ok}<span class="lbl">${t.copyLink}</span></button>` +
+    `<button class="pill" id="cpImg" type="button" title="${t.imageTip}">${ICON.img}<span class="lbl">${t.image}</span></button></div></div>` +
+    `<h2 class="cp-name" id="cpName" tabindex="-1">${name(c)}${tag}</h2><p class="cp-sub">${cap(scope())} · ${y}</p>` +
     `<div class="cp-hero"><p class="cp-ind">${t.ind[i]}</p><p class="cp-num">${v == null ? t.noData : pct(v)}</p>` +
-    `<p class="cp-cmp">${[eu != null && `${t.euAvg} <b>${pct(eu)}</b>`, v != null && `${t.rank} <b>${rows.indexOf(c) + 1}/${rows.length}</b>`].filter(Boolean).join(" · ")}</p></div>`;
+    `<p class="cp-cmp">${[eu != null && `${t.euAvg} <b>${pct(eu)}</b>`, v != null && `${t.rank} <b>${rows.indexOf(c) + 1}/${rows.length}</b>`].filter(Boolean).join(" · ")}</p>` +
+    trendHtml(c) +
+    `<div class="cp-cmpbar"><button class="pill" id="cpCmp" type="button"${full ? " disabled" : ""}>${inK ? ICON.minus : ICON.plus}${inK ? t.cmpDropThis : full ? t.cmpFullThis : t.cmpAddThis}</button>` +
+    (state.k.length ? `<button class="linkish" id="cpCmpGo" type="button">${t.cmpGo(state.k.length)}</button>` : "") + "</div></div>";
   // the current indicator in every sector; sector figures exist for all sizes only
   const cell = (k) => [val(i, c, "all", y, k), val(i, "EU27", "all", y, k), flag(i, c, "all", y, k)];
   const secVals = s === "all" ? SECTORS.flatMap((k) => cell(k).slice(0, 2)).filter((x) => x != null) : [];
@@ -403,12 +543,24 @@ function profileHtml(c) {
   return head + bySector + sections + `<p class="note cp-key"><i class="eu-tick"></i>${t.euAvg}</p>`;
 }
 $("profile").addEventListener("click", (e) => {
-  if (e.target.closest("#back")) return set({ c: null });
-  const b = e.target.closest(".prow");
+  const at = (sel) => e.target.closest(sel);
+  if (at("#back")) return set({ c: null });
+  if (at("#cpLink")) return copyLink(at("#cpLink"));
+  if (at("#cpImg")) return saveCard(state.c);
+  if (at("#cpCmp")) { toggleCmp(state.c); return $("cpCmp")?.focus({ preventScroll: true }); }
+  if (at("#cpCmpGo")) return goCmp();
+  const col = at(".tcol");
+  if (col) { if (timer) stop(); return set({ y: col.dataset.y }); }
+  const b = at(".prow");
   if (!b) return;
   const { n, i } = b.dataset, again = n ? `[data-n="${n}"]` : `[data-i="${i}"]`;
   set(n ? { n } : { i });
   $("profile").querySelector(`.prow${again}`)?.focus({ preventScroll: true }); // keep keyboard focus on the row
+});
+// the trend's legend follows the hovered year, then returns to the selected one
+$("profile").addEventListener("pointerover", (e) => { const col = e.target.closest(".tcol"); if (col) $("tleg").innerHTML = tleg(state.c, col.dataset.y); });
+$("profile").addEventListener("pointerout", (e) => {
+  if (e.target.closest(".tcol") && !e.relatedTarget?.closest?.(".tcol") && $("tleg")) $("tleg").innerHTML = tleg(state.c, state.y);
 });
 
 // ---- small vs large enterprises: a row per country, one dot per size class ----
@@ -484,6 +636,393 @@ d3.select("#gapBody")
   .on("focusout", hideGapTip)
   .on("click", (e) => { const li = e.target.closest("#gapList li"); if (li) { hideGapTip(); openCountry(d3.select(li).datum(), true); } });
 $("gapSort").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { gapSort = b.dataset.o; renderGap(); } });
+
+// ---- share: the whole view lives in the URL; copy it and say so ----
+let sayT;
+function say(msg) { // a short-lived status line, read out by screen readers
+  const el = $("say");
+  el.textContent = msg;
+  clearTimeout(sayT); sayT = setTimeout(() => (el.textContent = ""), 2400);
+}
+async function copyLink(btn) {
+  let ok = true;
+  try { await navigator.clipboard.writeText(location.href); } catch { ok = false; }
+  say(ok ? t.copied : t.copyFail);
+  btn.classList.toggle("ok", ok);
+  clearTimeout(btn.okT); btn.okT = setTimeout(() => btn.classList.remove("ok"), 1600);
+}
+$("share").addEventListener("click", (e) => copyLink(e.currentTarget));
+function download(blob, file) {
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: file });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+// ---- share card: the open country as a 1200x630 PNG, drawn in the page's font, always on the light palette ----
+const CARD = { paper: "#f5f6f8", panel: "#ffffff", ink: "#0f1a2e", muted: "#4f5a6c", faint: "#8a93a3", line: "#e1e5ec", eu: "#b7791f", euInk: "#94600f", c: "#4a5fc1" };
+async function saveCard(c) {
+  const { i, s, y, n } = state, W = 1200, H = 630, L = 72, F = '"Schibsted Grotesk", system-ui, sans-serif';
+  await Promise.all([400, 500, 700].map((w) => document.fonts.load(`${w} 16px "Schibsted Grotesk"`)));
+  const cv = Object.assign(document.createElement("canvas"), { width: W * 2, height: H * 2 }), g = cv.getContext("2d");
+  g.scale(2, 2);
+  const font = (size, weight) => (g.font = `${weight} ${size}px ${F}`);
+  const txt = (str, x, y0, size, weight = 400, color = CARD.ink, align = "left") => {
+    font(size, weight); g.fillStyle = color; g.textAlign = align; g.fillText(str, x, y0); return g.measureText(str).width; };
+  const wrap = (str, w, size, weight) => { // greedy, by words
+    font(size, weight);
+    return str.split(" ").reduce((out, word) => {
+      const ln = out.at(-1) ? `${out.at(-1)} ${word}` : word;
+      if (g.measureText(ln).width <= w || !out.at(-1)) out[out.length - 1] = ln; else out.push(word);
+      return out;
+    }, [""]);
+  };
+  const fit = (str, w, size, weight) => { font(size, weight); while (size > 30 && g.measureText(str).width > w) font((size -= 2), weight); return size; };
+  g.fillStyle = CARD.paper; g.fillRect(0, 0, W, H);
+
+  // left: who, what, how much
+  const colW = 520;
+  const w0 = txt("AI Adoption Map", L, 84, 20, 700);
+  txt(" · Eurostat", L + w0, 84, 20, 400, CARD.muted);
+  txt(name(c), L, 160, fit(name(c), colW, 56, 700), 700);
+  let yy = 210;
+  for (const ln of wrap(t.ind[i], colW, 26, 500).slice(0, 2)) { txt(ln, L, yy, 26, 500); yy += 34; }
+  for (const ln of wrap(`${t.base[baseOf(i)]} · ${cap(scope())} · ${y}`, colW, 19, 400).slice(0, 2)) { txt(ln, L, yy - 4, 19, 400, CARD.muted); yy += 26; }
+  const v = val(i, c, s, y), eu = val(i, "EU27", s, y), rk = rows.indexOf(c);
+  txt(v == null ? t.noData : pct(v), L - 4, yy + 96, v == null ? 64 : 112, 700);
+  yy += 146;
+  if (eu != null) {
+    g.fillStyle = CARD.eu; g.beginPath(); g.arc(L + 6, yy - 7, 6, 0, 2 * Math.PI); g.fill();
+    const w1 = txt(`${t.euAvg} `, L + 22, yy, 21, 400, CARD.muted);
+    txt(pct(eu), L + 22 + w1, yy, 21, 700, CARD.euInk);
+  }
+  if (v != null && rk >= 0) txt(`${t.rank} ${rk + 1}/${rows.length}`, L, yy + 34, 21, 400, CARD.muted);
+
+  // right: the trend, in a white panel like the site's
+  const P = { x: 640, y: 64, w: 488, h: 432 }, tr = trendOf(c);
+  if (tr) { // an indicator surveyed in one year only has no trend: the right side stays empty
+    g.fillStyle = CARD.panel; g.strokeStyle = CARD.line; g.lineWidth = 1;
+    g.beginPath(); g.roundRect(P.x + 0.5, P.y + 0.5, P.w, P.h, 16); g.fill(); g.stroke();
+    const { a, b, top, cs, es } = tr, box = { l: P.x + 32, r: P.x + P.w - 70, t: P.y + 92, b: P.y + P.h - 60 };
+    const X = (yr) => box.l + ((yr - a) / (b - a)) * (box.r - box.l), Y = (x) => box.b - (x / top) * (box.b - box.t);
+    txt(t.trend, P.x + 32, P.y + 44, 19, 700);
+    let lx = P.x + 32;
+    for (const [nm, col] of [[name(c), CARD.c], [t.eu, CARD.eu]]) {
+      g.fillStyle = col; g.fillRect(lx, P.y + 64, 18, 3);
+      lx += 26 + txt(nm, lx + 26, P.y + 70, 16, 500, CARD.muted) + 22;
+    }
+    for (const gv of [0, top / 2, top]) {
+      g.fillStyle = CARD.line; g.fillRect(box.l, Math.round(Y(gv)), box.r - box.l, 1);
+      txt(`${num(gv)}%`, box.r + 12, Y(gv) + 5, 14, 400, CARD.muted);
+    }
+    for (const yr of d3.range(a, b + 1)) {
+      const has = yearsOf(i).includes(String(yr)), on = String(yr) === y;
+      txt(String(yr), X(yr), box.b + 32, 15, on ? 700 : 400, on ? CARD.ink : has ? CARD.muted : CARD.faint, "center");
+    }
+    for (const [p, col] of [[es, CARD.eu], [cs, CARD.c]]) {
+      g.strokeStyle = col; g.lineWidth = 3; g.lineCap = "round";
+      for (const [p0, p1, dashed] of segs(p)) {
+        g.setLineDash(dashed ? [2, 7] : []); g.beginPath(); g.moveTo(X(p0[0]), Y(p0[1])); g.lineTo(X(p1[0]), Y(p1[1])); g.stroke();
+      }
+      g.setLineDash([]);
+      for (const [yr, x] of p) {
+        g.fillStyle = col; g.strokeStyle = CARD.panel; g.lineWidth = 3;
+        g.beginPath(); g.arc(X(yr), Y(x), String(yr) === y ? 7 : 5, 0, 2 * Math.PI); g.fill(); g.stroke();
+      }
+    }
+  }
+
+  // footer: source and address
+  g.fillStyle = CARD.line; g.fillRect(L, 548, W - 2 * L, 1);
+  txt(`${t.source} Eurostat, ${n === "all" ? "isoc_eb_ai" : "isoc_eb_ain2"}, ${t.extracted} ${data.extractedAt}`, L, 588, 17, 400, CARD.muted);
+  txt(SITE_URL.replace(/^https:\/\/|\/$/g, ""), W - L, 588, 17, 500, CARD.ink, "right");
+  cv.toBlob((blob) => { if (blob) { download(blob, `ai-adoption-${c}-${i}-${y}.png`); say(t.saved); } }, "image/png");
+}
+
+// ---- indicator definition: Eurostat's own wording, the base, years, coverage and code ----
+const dsOf = () => (state.n === "all" ? ["isoc_eb_ai", data.sourceUrl] : ["isoc_eb_ain2", sect.sourceUrl]);
+function defHtml() {
+  const { i, s, y } = state, m = i === "any" ? data : data.more[i], code = m.code ?? data.codes.indic_is, unit = m.unit ?? data.codes.unit;
+  // labels that count technologies end with their codes ("...: AI_TTM, AI_TSR, ..."): list them by name instead
+  const label = m.label.replace(/\s+/g, " "), parts = label.match(/^(.*?:)\s*((?:E_)?AI_\w+(?:,\s*(?:E_)?AI_\w+)*)$/);
+  const techs = parts ? parts[2].split(/,\s*/).map((x) => x.replace(/^(E_)?AI_/, "").toLowerCase()).filter((k) => t.ind[k]) : [];
+  const [ds, dsUrl] = dsOf(), cover = covered.filter((c) => val(i, c, s, y) != null).length;
+  const link = (href, text) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+  return `<p class="def-base">${t.base[baseOf(i)]}</p>` +
+    `<h3>${t.defOfficial}</h3><p class="def-q" lang="en">${parts ? parts[1] : label}</p>` +
+    (techs.length ? `<p class="def-sub">${t.defTechs}</p><ul class="def-techs">${techs.map((k) => `<li>${t.ind[k]}</li>`).join("")}</ul>` : "") +
+    `<dl class="def-dl"><dt>${t.defUnit}</dt><dd lang="en">${data.unitLabels[unit] ?? unit}</dd>` +
+    `<dt>${t.defYears}</dt><dd>${yearsOf(i).join(", ")}</dd>` +
+    `<dt>${t.defCover}</dt><dd>${t.defCover2(cover, covered.length, y, scope())}</dd>` +
+    `<dt>${t.defCode}</dt><dd><code>${code}</code>, ${link(dsUrl, `<code>${ds}</code>`)}</dd></dl>` +
+    [t.groupNote[IND[i].id], state.n !== "all" && t.sectorNote, SKIPPED.length && t.skipped(SKIPPED.join(", "))]
+      .filter(Boolean).map((x) => `<p class="note">${x}</p>`).join("") +
+    `<h3>${t.defAI}</h3><p class="def-q" lang="en">${AI_DEF}</p>` +
+    `<p class="def-links">${link(AI_DEF_URL, t.defArticle)} · ${link(META_URL, t.defMeta)}</p>`;
+}
+const def = $("def");
+$("info").addEventListener("click", () => { $("defTitle").textContent = t.ind[state.i]; $("defBody").innerHTML = defHtml(); def.showModal(); });
+$("defClose").addEventListener("click", () => def.close());
+def.addEventListener("click", (e) => { if (e.target === def) def.close(); }); // a click on the backdrop
+
+// ---- compare: 2 to 4 countries side by side on every indicator ----
+const TRY = ["DE", "FR", "IT", "ES"];
+const byName = (a, b) => name(a).localeCompare(name(b), state.l);
+const toggleCmp = (c) => set({ k: state.k.includes(c) ? state.k.filter((x) => x !== c) : [...state.k, c].slice(0, MAXK) });
+function goCmp() {
+  $("cmpSec").scrollIntoView({ behavior: DUR ? "smooth" : "auto", block: "start" });
+  $("cmpTitle").focus({ preventScroll: true });
+}
+function renderCmp() {
+  const { k, y, s, i } = state, cols = [...k, "EU27"];
+  $("cmpSub").textContent = `${cap(scope())} · ${y}`;
+  $("cmpChips").innerHTML = k.map((c) => `<li>${name(c)}<button type="button" data-rm="${c}" aria-label="${t.cmpRemove(name(c))}">${ICON.x}</button></li>`).join("");
+  const add = $("cmpAdd");
+  add.innerHTML = `<option value="">${k.length >= MAXK ? t.cmpFull : `${t.cmpAdd}…`}</option>` +
+    covered.filter((c) => !k.includes(c)).sort(byName).map((c) => `<option value="${c}">${name(c)}</option>`).join("");
+  add.disabled = k.length >= MAXK;
+  if (!k.length) {
+    $("cmpBody").innerHTML = `<div class="cmp-empty"><p>${t.cmpHint}</p><button class="pill" type="button" id="cmpTry">${t.cmpTry(TRY.map(name).join(", "))}</button></div>`;
+    return;
+  }
+  const cell = (x, c, max) => {
+    const v = val(x, c, s, y), f = flag(x, c, s, y);
+    return `<td${c === "EU27" ? ' class="eu"' : ""}><span class="v">${v == null ? "–" : pct(v)}${f ? `<abbr title="${t.note}: ${flagText(f)}">*</abbr>` : ""}</span>` +
+      `<span class="cb">${v == null ? "" : `<i style="width:${(v / max) * 100}%"></i>`}</span></td>`;
+  };
+  const groups = GROUPS.map((g) => {
+    const items = g.items.filter((x) => yearsOf(x).includes(y));
+    const vals = items.flatMap((x) => cols.map((c) => val(x, c, s, y))).filter((v) => v != null);
+    if (!vals.length) return "";
+    const max = ceil10(vals);
+    return `<tbody><tr class="grp"><th colspan="${cols.length + 1}" scope="colgroup">${t.groups[g.id]}<small>${t.base[g.base]}</small></th></tr>` +
+      items.map((x) => `<tr${x === i ? ' class="cur"' : ""}><th scope="row"><button class="cmp-i" type="button" data-i="${x}" aria-current="${x === i}">` +
+        `${t.short[x] ?? t.ind[x]}${baseOf(x) !== g.base ? `<small>${t.base[baseOf(x)]}</small>` : ""}</button></th>` +
+        cols.map((c) => cell(x, c, max)).join("") + "</tr>").join("") + "</tbody>";
+  }).join("");
+  $("cmpBody").innerHTML = (k.length < 2 ? `<p class="note cmp-one">${t.cmpOne}</p>` : "") +
+    `<table class="cmp" style="--cols:${cols.length}"><colgroup><col class="lab">${cols.map(() => "<col>").join("")}</colgroup>` +
+    `<thead><tr><td></td>${cols.map((c) => `<th scope="col"${c === "EU27" ? ' class="eu"' : ""}>${c === "EU27" ? t.eu : name(c)}</th>`).join("")}</tr></thead>${groups}</table>`;
+}
+$("cmpChips").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-rm]");
+  if (b) { set({ k: state.k.filter((x) => x !== b.dataset.rm) }); $("cmpAdd").focus(); }
+});
+$("cmpAdd").addEventListener("change", (e) => { if (e.target.value) set({ k: [...state.k, e.target.value].slice(0, MAXK) }); });
+$("cmpBody").addEventListener("click", (e) => {
+  if (e.target.closest("#cmpTry")) return set({ k: TRY.filter((c) => covered.includes(c)) });
+  const b = e.target.closest(".cmp-i");
+  if (b) { set({ i: b.dataset.i }); $("cmpBody").querySelector(`.cmp-i[data-i="${b.dataset.i}"]`)?.focus({ preventScroll: true }); }
+});
+
+// ---- two indicators: a dot per country; the axes stay fixed across years, so the dots move as the years play ----
+const xyBox = $("xy"), xySec = $("xySec"), xyTip = $("xyTip"), xySvg = d3.select("#xySvg");
+const xyGrid = xySvg.append("g").attr("class", "xg"), xyRef = xySvg.append("g"), xyDots = xySvg.append("g");
+let xyFor = null;
+const xyVals = (c) => [val(state.sx, c, state.s, state.y), val(state.sy, c, state.s, state.y)];
+const extentOf = (k) => d3.extent([...covered, "EU27"].flatMap((c) => yearsOf(k).map((y) => val(k, c, state.s, y))).filter((v) => v != null));
+const xyName = (c) => (c === "EU27" ? t.eu : name(c));
+const xyHtml = (c) => { const [a, b] = xyVals(c);
+  return `<b>${xyName(c)}</b><br><span class="m">${t.ind[state.sx]}</span> ${pct(a)}<br><span class="m">${t.ind[state.sy]}</span> ${pct(b)}`; };
+function renderXY() {
+  const { s, y, sx, sy, c: open, k } = state;
+  $("xyX").value = sx; $("xyY").value = sy;
+  $("xySub").textContent = `${cap(scope())} · ${y}`;
+  $("xyTy").textContent = `↑ ${t.ind[sy]} · ${t.base[baseOf(sy)]}`;
+  $("xyTx").textContent = `${t.ind[sx]} · ${t.base[baseOf(sx)]} →`;
+  const pts = covered.filter((c) => xyVals(c).every((v) => v != null));
+  xySvg.attr("display", pts.length ? null : "none");
+  if (!pts.length) {
+    hideXYTip();
+    const both = yearsOf(sx).filter((yy) => yearsOf(sy).includes(yy) && yearsOf(state.i).includes(yy));
+    $("xyNote").innerHTML = `${t.xyNone(y)} ${both.length ? `${t.xyYears} ${both.map((yy) => `<button class="linkish" type="button" data-y="${yy}">${yy}</button>`).join(" ")}` : ""}`;
+    return;
+  }
+  const missing = covered.filter((c) => !pts.includes(c)).map(name);
+  $("xyNote").textContent = missing.length ? `${t.xyMissing} ${missing.join(", ")}.` : "";
+  const w = xyBox.clientWidth, h = Math.round(Math.max(280, Math.min(440, w * 0.46))), m = { l: 42, r: 18, t: 12, b: 28 };
+  const x = d3.scaleLinear().domain(extentOf(sx)).nice(w < 520 ? 4 : 6).range([m.l, w - m.r]);
+  const yS = d3.scaleLinear().domain(extentOf(sy)).nice(5).range([h - m.b, m.t]);
+  xySvg.attr("width", w).attr("height", h).attr("viewBox", `0 0 ${w} ${h}`);
+  // recessive grid with values on the left and bottom edges
+  const tick = (cls, data, line, label) => xyGrid.selectAll(`.${cls}`).data(data, (d) => d)
+    .join((e) => e.append("g").attr("class", cls).call((g) => { g.append("line"); g.append("text"); }))
+    .call((g) => line(g.select("line"))).call((g) => label(g.select("text").text((d) => `${num(d)}%`)));
+  tick("gy", yS.ticks(5), (l) => l.attr("x1", m.l).attr("x2", w - m.r).attr("y1", yS).attr("y2", yS),
+    (tx) => tx.attr("x", m.l - 8).attr("y", (d) => yS(d) + 4).attr("text-anchor", "end"));
+  tick("gx", x.ticks(w < 520 ? 4 : 6), (l) => l.attr("x1", x).attr("x2", x).attr("y1", m.t).attr("y2", h - m.b),
+    (tx) => tx.attr("x", x).attr("y", h - m.b + 18).attr("text-anchor", "middle"));
+  // the EU27 as two dashed reference lines
+  const [ex, ey] = xyVals("EU27"), eu = ex != null && ey != null;
+  xyRef.selectAll("line").data(eu ? ["v", "h"] : []).join("line").attr("class", "eul")
+    .transition().duration(DUR).ease(d3.easeCubicInOut)
+    .attr("x1", (d) => (d === "v" ? x(ex) : m.l)).attr("x2", (d) => (d === "v" ? x(ex) : w - m.r))
+    .attr("y1", (d) => (d === "v" ? m.t : yS(ey))).attr("y2", (d) => (d === "v" ? h - m.b : yS(ey)));
+  // labels: right, left, above or below the dot, wherever no other dot or label sits; else none (the tooltip names it)
+  const all = eu ? ["EU27", ...pts] : pts, at = (c) => [x(xyVals(c)[0]), yS(xyVals(c)[1])];
+  const taken = all.map((c) => { const [px, py] = at(c); return [px - 6, py - 6, px + 6, py + 6]; });
+  const free = (r) => r[0] >= m.l - 4 && r[2] <= w && r[1] >= 0 && r[3] <= h - m.b + 4 &&
+    !taken.some((q) => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1]);
+  const place = {};
+  for (const c of all) {
+    const [px, py] = at(c), tw = xyName(c === "EU27" ? c : "XX").length * 6.6;
+    const o = [[8, 4, "start", [px + 8, py - 6, px + 8 + tw, py + 5]], [-8, 4, "end", [px - 8 - tw, py - 6, px - 8, py + 5]],
+      [0, -9, "middle", [px - tw / 2, py - 19, px + tw / 2, py - 8]], [0, 17, "middle", [px - tw / 2, py + 7, px + tw / 2, py + 18]]].find((q) => free(q[3]));
+    if (o) { taken.push(o[3]); place[c] = o; }
+  }
+  const sel = xyDots.selectAll(".pt").data(all, (d) => d)
+    .join((e) => e.append("g").attr("class", "pt").attr("transform", (d) => `translate(${at(d)})`)
+      .call((g) => { g.append("circle"); g.append("text"); }));
+  sel.classed("eu", (d) => d === "EU27").classed("sel", (d) => d === open || k.includes(d))
+    .attr("tabindex", (d) => (d === "EU27" ? null : 0)).attr("role", (d) => (d === "EU27" ? null : "button"))
+    .attr("aria-label", (d) => `${xyName(d)}: ${t.ind[sx]} ${pct(xyVals(d)[0])}, ${t.ind[sy]} ${pct(xyVals(d)[1])}`);
+  sel.transition().duration(DUR).ease(d3.easeCubicInOut).attr("transform", (d) => `translate(${at(d)})`);
+  sel.select("circle").attr("r", (d) => (d === "EU27" ? 6 : 5));
+  sel.select("text").text((d) => (d === "EU27" ? t.eu : d)).attr("display", (d) => (place[d] ? null : "none"))
+    .attr("x", (d) => place[d]?.[0] ?? 0).attr("y", (d) => place[d]?.[1] ?? 0).attr("text-anchor", (d) => place[d]?.[2] ?? "start");
+  sel.filter((d) => d === "EU27").raise();
+  if (xyFor) { if (all.includes(xyFor)) xyTip.innerHTML = xyHtml(xyFor); else hideXYTip(); }
+}
+function showXYTip(c, el) {
+  xyFor = c; xyTip.innerHTML = xyHtml(c); xyTip.hidden = false;
+  const box = xySec.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const left = Math.min(Math.max(r.left - box.left + 16, 4), box.width - xyTip.offsetWidth - 4);
+  const above = r.top - box.top - xyTip.offsetHeight - 8;
+  Object.assign(xyTip.style, { left: `${left}px`, top: `${above > 4 ? above : r.bottom - box.top + 8}px` });
+}
+function hideXYTip() { xyFor = null; xyTip.hidden = true; }
+const xyPt = (e) => { const p = e.target.closest?.(".pt"); return p ? [p, d3.select(p).datum()] : []; };
+d3.select("#xySvg")
+  .on("pointerover", (e) => { const [p, c] = xyPt(e); if (p) showXYTip(c, p); })
+  .on("pointerleave", (e) => { if (e.pointerType === "mouse") hideXYTip(); })
+  .on("focusin", (e) => { const [p, c] = xyPt(e); if (p) showXYTip(c, p); })
+  .on("focusout", hideXYTip)
+  .on("click", (e) => { const [, c] = xyPt(e); if (c && c !== "EU27") { hideXYTip(); openCountry(c, true); } })
+  .on("keydown", (e) => { const [, c] = xyPt(e); if (c && c !== "EU27" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openCountry(c, true); } });
+$("xyX").addEventListener("change", (e) => set({ sx: e.target.value }));
+$("xyY").addEventListener("change", (e) => set({ sy: e.target.value }));
+$("xyNote").addEventListener("click", (e) => { const b = e.target.closest("[data-y]"); if (b) set({ y: b.dataset.y }); });
+let xyQueued = false; // redraw at the new width
+new ResizeObserver(() => { if (!xyQueued) { xyQueued = true; requestAnimationFrame(() => { xyQueued = false; renderXY(); }); } }).observe(xyBox);
+
+// ---- data table of the current view, and the same as CSV ----
+const tableOrder = () => { const { i, s, y } = state;
+  return ["EU27", ...covered.slice().sort((a, b) => desc((c) => val(i, c, s, y))(a, b) || byName(a, b))]; };
+function renderData() {
+  const { i, s, y } = state, ys = yearsOf(i), seen = new Set();
+  $("dataSub").textContent = `${t.ind[i]} · ${t.base[baseOf(i)]} · ${cap(scope())}`;
+  $("dataSum").textContent = t.showTable(covered.length, ys[0], ys.at(-1));
+  const cur = (yy) => (yy === y ? ' class="cur"' : "");
+  const cell = (c, yy) => { const v = val(i, c, s, yy), f = flag(i, c, s, yy);
+    if (f) seen.add(f);
+    return `<td${cur(yy)}>${v == null ? "–" : pct(v)}${f ? `<sup title="${flagText(f)}">${f}</sup>` : ""}</td>`; };
+  $("dataTbl").innerHTML = `<caption class="sr-only">${t.ind[i]}, ${t.base[baseOf(i)]}, ${scope()}</caption>` +
+    `<thead><tr><th scope="col">${t.country}</th>${ys.map((yy) => `<th scope="col"${cur(yy)}>${yy}</th>`).join("")}</tr></thead><tbody>` +
+    tableOrder().map((c) => `<tr${c === "EU27" ? ' class="eu"' : ""}><th scope="row">${c === "EU27" ? t.eu : name(c)}</th>${ys.map((yy) => cell(c, yy)).join("")}</tr>`).join("") +
+    "</tbody>";
+  $("dataNote").textContent = [t.dataNote, ...[...seen].map((f) => `${f}: ${flagText(f)}`)].join(" ");
+}
+// CSV in the page language's convention: "," and 1.5 in English, ";" and 1,5 in Italian (what Excel expects there)
+function saveCsv() {
+  const { i, s, n, l } = state, ys = yearsOf(i), sep = l === "it" ? ";" : ",";
+  const q = (x) => (x.includes(sep) || /["\r\n]/.test(x) ? `"${x.replace(/"/g, '""')}"` : x); // quote only what needs it
+  const num0 = (v) => (v == null ? "" : l === "it" ? String(v).replace(".", ",") : String(v));
+  const lines = [[t.code, t.country, ...ys, t.notes], ...tableOrder().map((c) => [c, c === "EU27" ? t.eu : name(c),
+    ...ys.map((yy) => num0(val(i, c, s, yy))),
+    ys.map((yy) => flag(i, c, s, yy) && `${yy}: ${flagText(flag(i, c, s, yy))}`).filter(Boolean).join("; ")])];
+  const code = i === "any" ? data.codes.indic_is : data.more[i].code;
+  const scopeCode = n === "all" ? Object.keys(data.codes.size_emp).find((k) => data.codes.size_emp[k] === s) : `nace-${n}`;
+  const text = "\uFEFF" + lines.map((r) => r.map((x) => q(String(x))).join(sep)).join("\r\n") + "\r\n"; // BOM: Excel reads UTF-8
+  download(new Blob([text], { type: "text/csv;charset=utf-8" }), `ai-adoption_${code}_${scopeCode}.csv`);
+}
+$("csv").addEventListener("click", saveCsv);
+
+// ---- guided tour: six facts, each computed from the data and shown on the page ----
+let tourK = -1, marks = [];
+function tourSteps() {
+  const any = (c, y, s = "all", n = "all") => val("any", c, s, y, n);
+  const ys = yearsOf("any", "all"), a = ys[0], b = ys.at(-1), base = { i: "any", s: "all", n: "all", y: b, c: null };
+  const desc2 = (p, q) => q[1] - p[1];
+  const spread = covered.map((c) => [c, any(c, b)]).filter(([, v]) => v != null).sort(desc2), hi = spread[0], lo = spread.at(-1);
+  const secs = SECTORS.slice(1).map((n) => [n, any("EU27", b, "all", n)]).filter(([, v]) => v != null).sort(desc2);
+  const topOf = (id, y) => { const g = GROUPS.find((x) => x.id === id);
+    return g.items.filter((k) => baseOf(k) === g.base).map((k) => [k, val(k, "EU27", "all", y, "all")]).filter(([, v]) => v != null).sort(desc2)[0]; };
+  const tech = topOf("tech", b), by = yearsOf("ble", "all").findLast((y) => topOf("barrier", y)), bar = topOf("barrier", by);
+  return [
+    { text: t.st.growth(a, pct(any("EU27", a)), b, pct(any("EU27", b))), set: base, to: ".pulse" },
+    { text: t.st.spread(b, pct(lo[1]), name(lo[0]), pct(hi[1]), name(hi[0])), set: base, to: ".grid", mark: [lo[0], hi[0]] },
+    { text: t.st.size(b, pct(any("EU27", b, "large")), pct(any("EU27", b, "small"))), set: base, to: "#gapSec" },
+    { text: t.st.sector(b, pct(secs[0][1]), t.sectors[secs[0][0]], pct(secs.at(-1)[1]), t.sectors[secs.at(-1)[0]]), set: { ...base, n: secs[0][0] }, to: ".grid" },
+    { text: t.st.tech(b, t.ind[tech[0]], pct(tech[1])), set: { ...base, i: tech[0] }, to: ".grid" },
+    { text: t.st.barrier(by, t.ind[bar[0]], pct(bar[1])), set: { ...base, i: bar[0], y: by }, to: ".grid" },
+  ];
+}
+function paintStep() { // the words only, e.g. after a language switch
+  const steps = tourSteps(), last = tourK === steps.length - 1;
+  $("tourStep").textContent = `${tourK + 1}/${steps.length}`;
+  $("tourText").textContent = steps[tourK].text;
+  $("tourPrev").textContent = `← ${t.tourPrev}`;
+  $("tourPrev").disabled = !tourK;
+  $("tourNext").textContent = last ? t.tourDone : `${t.tourNext} →`;
+}
+function showStep(k) {
+  const st = tourSteps()[k];
+  tourK = k;
+  if (timer) stop();
+  set(st.set);
+  marks = st.mark ?? [];
+  ctry.classed("mark", (f) => marks.includes(byNum[f.id]));
+  $("tour").hidden = false;
+  document.body.classList.add("touring");
+  paintStep();
+  document.querySelector(st.to).scrollIntoView({ behavior: DUR ? "smooth" : "auto", block: "start" });
+}
+function endTour() {
+  tourK = -1; marks = [];
+  ctry.classed("mark", false);
+  $("tour").hidden = true;
+  document.body.classList.remove("touring");
+  $("tourBtn").focus({ preventScroll: true });
+}
+$("tourBtn").addEventListener("click", () => { showStep(0); $("tourNext").focus({ preventScroll: true }); });
+$("tourNext").addEventListener("click", () => (tourK >= tourSteps().length - 1 ? endTour() : showStep(tourK + 1)));
+$("tourPrev").addEventListener("click", () => { showStep(tourK - 1); if ($("tourPrev").disabled) $("tourNext").focus({ preventScroll: true }); });
+$("tourClose").addEventListener("click", endTour);
+
+// ---- find a country: the native datalist suggests names in the page language ----
+const fold = (x) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+const find = $("find");
+function lookup(q) { // exact name or code first, then the start of a name, then anywhere in it
+  const f = fold(q), list = covered.map((c) => [c, fold(name(c))]);
+  if (!f) return null;
+  return (list.find(([c, nm]) => nm === f || fold(c) === f) ?? list.find(([, nm]) => nm.startsWith(f)) ?? list.find(([, nm]) => nm.includes(f)))?.[0] ?? null;
+}
+function go(c) { find.value = ""; find.setCustomValidity(""); openCountry(c); }
+find.addEventListener("input", () => {
+  find.setCustomValidity("");
+  const c = covered.find((x) => fold(name(x)) === fold(find.value)); // a suggestion picked, or a whole name typed
+  if (c) go(c);
+});
+find.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  const c = lookup(find.value);
+  if (c) go(c);
+  else if (find.value.trim()) { find.setCustomValidity(t.findNone(find.value.trim())); find.reportValidity(); }
+});
+
+// ---- keyboard: ←/→ year, Space play/pause, / or Cmd/Ctrl+K find; ignored while typing in a field ----
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); find.focus(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey || def.open || e.target.closest?.("input, select, textarea, [contenteditable]")) return;
+  if (e.key === "/") { e.preventDefault(); find.focus(); return; }
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    const ys = yearsOf(state.i), y = ys[ys.indexOf(state.y) + (e.key === "ArrowRight" ? 1 : -1)];
+    if (y) { e.preventDefault(); if (timer) stop(); set({ y }); }
+    return;
+  }
+  // Space plays only when no control has focus: on a button it still presses that button
+  if (e.key === " " && !e.target.closest?.("a, button, summary, [tabindex]") && !$("play").disabled) { e.preventDefault(); $("play").click(); }
+});
 
 // ---- render ----
 let heroVal = null;
@@ -578,6 +1117,9 @@ function render() {
     rows.some((k) => flag(i, k, s, y)) ? t.flagFoot : ""].filter(Boolean).join(" ");
 
   renderGap();
+  renderXY();
+  renderCmp();
+  renderData();
 }
 
 // ---- controls ----

@@ -37,9 +37,11 @@ h1,h2,h3{text-wrap:balance} p{text-wrap:pretty}
 .top{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 16px}
 .top .sub{grid-column:1/-1}
 .prefs{display:flex;align-items:center;gap:8px;align-self:start;margin-top:6px}
-.theme{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted)}
-.theme:hover{color:var(--ink);border-color:var(--faint)}
-.theme svg{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ibtn{display:grid;place-items:center;flex:none;width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted)}
+.ibtn:hover{color:var(--ink);border-color:var(--faint)}
+.ibtn svg,.pill svg,.chips svg,.info svg,.find svg{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+/* copy link: the icon turns into a check for a moment */
+.i-ok,.ok .i-link{display:none} .ok .i-ok{display:block} .ibtn.ok{color:var(--ink)}
 /* the icon shows the theme a click switches to */
 [data-theme=dark] .theme .i-moon,[data-theme=light] .theme .i-sun{display:none}
 h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spacing:-.025em;margin:0;max-width:20ch}
@@ -47,6 +49,10 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .lang{display:flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--panel)}
 .lang button{border:0;background:none;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;color:var(--muted)}
 .lang button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+/* the guided tour starts under the subtitle */
+.tour{grid-column:1/-1;justify-self:start;margin-top:4px}
+.tour small{font-size:12.5px;font-weight:400;color:var(--muted);margin-left:2px}
+.play svg,.tour svg{fill:currentColor;stroke:none}
 
 /* EU27 pulse: headline + the year selector drawn as the EU27 trend */
 .pulse{display:grid;gap:18px 20px;align-items:end;margin:28px 0 0;padding:20px 0 22px;
@@ -77,15 +83,16 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .years button:disabled{opacity:.35;cursor:default}
 .years button[aria-pressed=true] .col{opacity:1}
 .years button[aria-pressed=true] .yl,.years button[aria-pressed=true] .yv{color:var(--ink);font-weight:700}
-/* play/pause: the year chart's one action, in its header; filled while playing, like a selected control */
-.play{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 10px;border:1px solid var(--line);
-  border-radius:999px;background:var(--panel);color:var(--ink);font-size:13px;font-weight:500}
-.play:hover:not(:disabled){border-color:var(--faint)}
-.play svg{fill:currentColor}
+/* pills: every text button; filled = on (playing, or the primary step of the tour) */
+.pill{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--line);border-radius:999px;
+  background:var(--panel);color:var(--ink);font-size:13px;font-weight:500;white-space:nowrap}
+.pill:hover:not(:disabled){border-color:var(--faint)}
+.pill.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.pill:disabled{opacity:.4;cursor:default}
+/* play/pause: the year chart's one action, in its header */
+.play{padding:0 12px 0 10px}
 .play .i-pause,.play.on .i-play{display:none}
 .play.on .i-pause{display:block}
-.play.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.play:disabled{opacity:.4;cursor:default}
 @media (min-width:760px){
   .pulse{grid-template-columns:1fr auto;gap:24px 32px}
   .ynote{grid-column:2;margin-top:-18px}
@@ -101,6 +108,12 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 select{font:inherit;font-size:14px;font-weight:500;color:var(--ink);background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23808a9b' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center;
   border:1px solid var(--line);border-radius:10px;padding:0 34px 0 12px;height:44px;width:100%;text-overflow:ellipsis;appearance:none;cursor:pointer}
 select:hover{border-color:var(--faint)}
+.ctl-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.ctl-head .ctl-lbl{margin:0}
+/* negative margins: the button's padding doesn't make this label row taller than its neighbours */
+.info{display:inline-flex;align-items:center;gap:5px;margin:-3px -6px;padding:3px 6px;border:0;border-radius:6px;background:none;
+  font-size:12px;font-weight:500;color:var(--muted)}
+.info:hover{color:var(--ink);background:var(--line)}
 .seg button:disabled{opacity:.4;cursor:default}
 .ctl-note{grid-column:1/-1;margin-top:-6px;font-size:12.5px;color:var(--muted)}
 .seg{display:flex;flex-wrap:wrap;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
@@ -122,6 +135,14 @@ select:hover{border-color:var(--faint)}
 .mapwrap .views{position:absolute;top:12px;right:12px;z-index:2;border-color:transparent;box-shadow:var(--float)}
 .mapwrap .views button{min-height:30px;padding:4px 12px;font-size:13px}
 #map{display:block;width:100%;height:auto}
+/* find a country: top-left of the map, the same floating look as the map/globe toggle */
+.find{position:absolute;top:12px;left:12px;z-index:2;width:min(230px,calc(100% - 176px));border-radius:10px;background:var(--panel);box-shadow:var(--float)}
+.find svg{position:absolute;left:11px;top:50%;margin-top:-7.5px;color:var(--muted);pointer-events:none}
+#find{display:block;width:100%;height:38px;padding:0 10px 0 33px;border:1px solid transparent;border-radius:10px;background:none;
+  font:inherit;font-size:13.5px;color:var(--ink)}
+#find::placeholder{color:var(--muted);opacity:1}
+#find:focus-visible{outline:2px solid var(--focus);outline-offset:0}
+.ctry.mark{stroke:var(--ink);stroke-width:2.2}
 .land{fill:var(--land);stroke:var(--edge);stroke-width:.5}
 .ctry{stroke:var(--edge);stroke-width:.7;cursor:pointer;outline:none;transition:fill .5s}
 .ctry:hover,.ctry.hl{stroke:var(--ink);stroke-width:1.4}
@@ -172,12 +193,14 @@ select:hover{border-color:var(--faint)}
 .note{font-size:12.5px;color:var(--muted);margin-top:12px}
 
 /* small vs large: a row per country, one dot per size class on a shared axis */
-.gapsec{position:relative;margin-top:16px;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
-.gap-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px 24px;margin-bottom:12px}
-.gapsec h2{font-size:14px;font-weight:700;margin:0 0 4px;letter-spacing:-.005em}
-.gap-head .hint{margin:0}
-/* inside a panel the sort control is a recessed well, not another bordered box */
-.gapsec .seg{background:var(--paper);border-color:transparent}
+.sec{position:relative;margin-top:16px;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);scroll-margin-top:12px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px 24px;margin-bottom:12px}
+.sec h2{font-size:14px;font-weight:700;margin:0 0 4px;letter-spacing:-.005em;outline:none}
+.sec-head .hint{margin:0}
+.sec>.hint,.sec .note{max-width:60ch} /* about 80 characters a line: "0", which ch measures, is wider than most letters */
+/* inside a panel, controls are recessed wells, not more bordered boxes */
+.sec .seg,.sec select{background-color:var(--paper);border-color:transparent}
+.sec select:hover{border-color:var(--line)}
 .gap-key{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--muted);margin-bottom:4px}
 .gap-key span{display:inline-flex;align-items:center;gap:6px}
 .gap-key small{font-size:inherit;color:var(--faint)}
@@ -206,7 +229,7 @@ select:hover{border-color:var(--faint)}
 .trk .ln,.trk .dt{transition:left .55s cubic-bezier(.2,.7,.2,1),width .55s cubic-bezier(.2,.7,.2,1)}
 
 .series h2{font-size:15px;font-weight:700;margin:0}
-.series{margin:32px 0 0;padding:20px 0;border-top:1px solid var(--line);display:grid;gap:6px;max-width:72ch}
+.series{margin:32px 0 0;padding:20px 0;border-top:1px solid var(--line);display:grid;gap:6px;max-width:60ch}
 .ft{font-size:13px;color:var(--muted);margin-top:24px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:4px}
 code{font-size:.92em}
 
@@ -221,7 +244,7 @@ code{font-size:.92em}
   .rank .row,.euref,.prow{grid-template-columns:1.4em minmax(0,1fr) 32% 3.2em;gap:6px}
   .prow{grid-template-columns:minmax(0,1fr) 30% 3.2em}
   #gapSort{grid-template-columns:repeat(3,1fr)}
-  .gap-head{display:grid}
+  .sec-head{display:grid}
   .gap-row,.gap-axis{grid-template-columns:minmax(0,6.5rem) minmax(0,1fr) 4rem;gap:8px}
   .years-wrap{justify-self:stretch} .years{gap:2px} .years button{flex:1 1 0;min-width:0;width:auto} .years .ygap{flex:0 0 28px}
   /* language and theme get their own row so the title keeps the full width */
@@ -243,12 +266,45 @@ code{font-size:.92em}
 
 /* country profile (replaces the ranking while open) */
 .profile:not([hidden]){animation:rise .35s cubic-bezier(.2,.7,.2,1) backwards}
-.cp-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.back{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:500}
-.back:hover{border-color:var(--faint)}
+.cp-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.cp-acts{display:flex;gap:6px}
+/* a narrow panel keeps back and share on one row: share shows its icons alone */
+.rank{container-type:inline-size}
+@container (max-width:340px){
+  .cp-acts .pill{aspect-ratio:1;padding:0;justify-content:center}
+  .cp-acts .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
 .cp-sub{font-size:12.5px;color:var(--muted)}
-.rank .cp-name{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:14px 0 2px;display:flex;align-items:center;outline:none}
+.rank .cp-name{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:14px 0 0;display:flex;align-items:center;outline:none}
 .cp-hero{padding:10px 0 14px;border-bottom:1px solid var(--line)}
+.cp-cmpbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:12px}
+.linkish{border:0;background:none;padding:0;font-size:13px;font-weight:500;color:var(--ink);text-decoration:underline;
+  text-decoration-color:var(--faint);text-underline-offset:3px}
+.linkish:hover{text-decoration-color:var(--ink)}
+
+/* trend in the profile: the country against the EU27; lines in SVG, dots and labels in HTML so text stays crisp */
+.trend{position:relative;margin:14px 0 0;padding-left:2px}
+.tplot{position:relative;height:86px;margin:0 12px 0 34px}
+.tplot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.tgrid{fill:none;stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+.tl{fill:none;stroke-width:2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.tl.c{stroke:var(--b3)} .tl.e{stroke:var(--eu)} .tl.dash{stroke-dasharray:1 5}
+.ttop{position:absolute;top:-7px;right:calc(100% + 8px);font-size:11px;color:var(--muted)}
+.tguide{position:absolute;top:-6px;bottom:0;width:1px;background:var(--faint);opacity:.45}
+.tdot{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;box-shadow:0 0 0 2px var(--panel)}
+.tdot.c{background:var(--b3)} .tdot.e{background:var(--eu)}
+.tdot.on{width:10px;height:10px;margin:-5px 0 0 -5px}
+.taxis{position:relative;height:16px;margin:6px 12px 0 34px;font-size:11px;color:var(--muted)}
+.taxis span{position:absolute;transform:translateX(-50%)}
+.taxis .gap{color:var(--faint)} .taxis .on{color:var(--ink);font-weight:700}
+.tcols{position:absolute;inset:-6px 12px -4px 34px}
+.tcol{position:absolute;top:0;bottom:0;cursor:pointer;border-radius:4px}
+.tcol:hover{background:color-mix(in srgb,var(--b1) 18%,transparent)}
+.tleg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.tleg b{color:var(--ink);font-weight:500}
+.tleg .ty{margin-left:auto}
+.sw{display:inline-block;width:12px;height:2px;margin-right:6px;vertical-align:middle;border-radius:1px}
+.sw.c{background:var(--b3)} .sw.e{background:var(--eu)}
 .cp-ind{font-size:13px;color:var(--muted)}
 .cp-num{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
 .cp-cmp{font-size:13px;color:var(--muted)} .cp-cmp b{color:var(--ink);font-weight:500}
@@ -270,4 +326,113 @@ code{font-size:.92em}
 .eu-tick{display:inline-block;width:2px;height:12px;background:var(--eu);border-radius:1px}
 @media (max-width:540px){.prow{grid-template-columns:minmax(0,1fr) 30% 3.2em;gap:6px}}
 @media (max-width:540px){.prow{padding:5px 6px}}
-@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.theme{width:42px;height:42px}.play{height:40px;padding:0 16px 0 14px}.back{min-height:40px;padding:0 16px}.prow{min-height:40px}}
+@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.ibtn{width:42px;height:42px}.pill{height:40px;padding:0 16px}.play{padding:0 16px 0 14px}.prow{min-height:40px}#find{height:42px}}
+
+/* two indicators: a dot per country */
+.xy-axes{display:grid;grid-template-columns:repeat(2,minmax(0,16rem));gap:10px 14px}
+.xy{position:relative;margin-top:10px}
+.xy-ty,.xy-tx{font-size:12px;font-weight:500;color:var(--muted)}
+.xy-ty{margin-bottom:6px} .xy-tx{text-align:right;margin-top:2px}
+#xySvg{display:block;overflow:visible}
+.xg line{stroke:var(--line)}
+.xg text{fill:var(--muted);font-size:11px}
+.eul{stroke:var(--eu);stroke-width:1.5;stroke-dasharray:4 4}
+.pt{cursor:pointer;outline:none}
+.pt circle{fill:var(--b3);stroke:var(--panel);stroke-width:2;transition:r .15s}
+/* a halo in the panel colour keeps labels readable where they cross a line */
+.pt text{fill:var(--muted);font-size:10.5px;font-weight:500;pointer-events:none;paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}
+.pt:hover circle,.pt:focus-visible circle{fill:var(--b4);stroke:var(--ink)}
+.pt:focus-visible circle{stroke:var(--focus);stroke-width:3}
+.pt.sel circle{stroke:var(--ink);stroke-width:2.5}
+.pt.eu{cursor:default} .pt.eu circle{fill:var(--eu)} .pt.eu text{fill:var(--eu-ink);font-weight:700}
+
+/* compare: countries side by side, grouped like the profile */
+.cmp-pick{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}
+.chips li{display:inline-flex;align-items:center;gap:2px;height:32px;padding:0 4px 0 12px;border-radius:999px;background:var(--paper);font-size:13px;font-weight:500}
+.chips button{display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:none;color:var(--muted)}
+.chips button:hover{color:var(--ink);background:var(--line)}
+#cmpAdd{width:auto;max-width:100%;height:32px;border-radius:999px;font-size:13px;padding:0 32px 0 14px}
+.cmp-empty{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;color:var(--muted);font-size:13.5px}
+.cmp-one{margin:0 0 8px}
+.cmp{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
+.cmp col.lab{width:32%}
+.cmp th,.cmp td{padding:4px 8px;text-align:left;font-weight:400;vertical-align:middle}
+.cmp thead th{font-size:13px;font-weight:700;border-bottom:1px solid var(--line);padding-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmp .eu{color:var(--eu-ink)}
+.cmp .grp th{padding:16px 8px 4px;font-size:13.5px;font-weight:700}
+.cmp .grp small,.cmp-i small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.cmp-i{display:block;width:calc(100% + 12px);margin:0 -6px;padding:2px 6px;border:0;border-radius:5px;background:none;text-align:left;font-size:13px;line-height:1.3}
+.cmp-i:hover{background:color-mix(in srgb,var(--b1) 22%,transparent)}
+.cmp tr.cur .cmp-i{background:color-mix(in srgb,var(--b1) 34%,transparent);font-weight:700}
+.cmp .v{font-weight:500;white-space:nowrap}
+.cmp td.eu .v{color:var(--eu-ink)}
+.cmp abbr{text-decoration:none;color:var(--eu-ink)}
+.cmp .cb{position:relative;display:block;height:6px;margin-top:3px;border-radius:2px;background:color-mix(in srgb,var(--line) 60%,transparent)}
+.cmp .cb i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:var(--b3)}
+.cmp td.eu .cb i{background:var(--eu)}
+
+/* data table */
+#dataDet summary{width:fit-content;padding:4px 0;cursor:pointer;font-size:13.5px;font-weight:500}
+.tbl-wrap{overflow-x:auto;margin-top:8px}
+.tbl{width:100%;max-width:760px;border-collapse:collapse;font-size:13px}
+.tbl th,.tbl td{padding:5px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th:first-child{text-align:left;font-weight:500}
+.tbl thead th{font-size:12px;font-weight:500;color:var(--muted)}
+.tbl .cur{background:color-mix(in srgb,var(--b1) 16%,transparent);font-weight:700;color:var(--ink)}
+.tbl tr.eu th,.tbl tr.eu td{color:var(--eu-ink);font-weight:500}
+.tbl sup{margin-left:2px;font-size:10px;color:var(--eu-ink)}
+
+/* indicator definition: a modal dialog */
+.def{width:min(580px,calc(100% - 24px));max-height:calc(100% - 48px);padding:0;border:1px solid var(--line);border-radius:14px;
+  background:var(--panel);color:var(--ink);box-shadow:var(--tip-shadow)}
+.def::backdrop{background:rgba(9,14,26,.5)}
+.def-head{position:sticky;top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 6px;background:var(--panel)}
+.def h2{font-size:19px;font-weight:700;letter-spacing:-.015em;margin:0;line-height:1.25}
+#defBody{padding:0 20px 20px;font-size:14px}
+.def-base{color:var(--muted);font-size:13.5px}
+.def h3{font-size:13px;font-weight:700;margin:18px 0 6px}
+.def-q{padding:10px 12px;border-radius:8px;background:var(--paper);font-size:13.5px}
+.def-sub{font-size:12.5px;color:var(--muted);margin:8px 0 2px}
+.def-techs{margin:0;padding-left:18px;font-size:13.5px}
+.def-dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:18px 0 0;font-size:13.5px}
+.def-dl dt{color:var(--muted)} .def-dl dd{margin:0}
+.def .note{margin-top:10px}
+.def-links{margin-top:10px;font-size:13px}
+
+/* guided tour: a card docked at the bottom while the page moves behind it */
+.tourcard{position:fixed;z-index:30;left:50%;bottom:16px;width:min(560px,calc(100% - 24px));transform:translateX(-50%);
+  padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:var(--tip-shadow)}
+.tourcard:not([hidden]){animation:dock .3s cubic-bezier(.2,.7,.2,1)}
+@keyframes dock{from{opacity:0;transform:translate(-50%,12px)}}
+.tour-head{display:flex;align-items:center;gap:10px}
+.tour-head h2{font-size:13.5px;font-weight:700;margin:0}
+.tour-n{margin-right:auto;font-size:12.5px;color:var(--muted)}
+.tour-text{margin:8px 0 12px;font-size:15px;line-height:1.5}
+.tour-nav{display:flex;justify-content:space-between;gap:8px}
+body.touring{padding-bottom:200px} /* room to scroll the last panels above the card */
+
+/* status line: copy and save feedback */
+.toast{position:fixed;z-index:40;top:16px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:999px;
+  background:var(--ink);color:var(--paper);font-size:13.5px;font-weight:500;box-shadow:var(--float);pointer-events:none}
+.toast:empty{display:none}
+
+.keys{color:var(--muted)}
+.keys kbd{font:inherit;font-size:12px;padding:0 5px;border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+@media (hover:none){.keys{display:none}}
+
+@media (max-width:540px){
+  .xy-axes{grid-template-columns:1fr}
+  /* compare: each indicator on its own line, the values in a row under it */
+  .cmp,.cmp thead,.cmp tbody{display:block}
+  .cmp colgroup{display:none}
+  .cmp tr{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:4px}
+  .cmp tr>:first-child{grid-column:1/-1}
+  .cmp thead td{display:none}
+  .cmp th,.cmp td{padding:3px 4px}
+  .cmp tbody td{padding-bottom:8px}
+  .cmp .cb{display:none}
+  .cmp thead th{font-size:11.5px;white-space:normal;overflow:visible;padding-left:2px;padding-right:2px}
+  .tourcard{bottom:10px;padding:12px 14px}
+  .tour-text{font-size:14.5px}
+}

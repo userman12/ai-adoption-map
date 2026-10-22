@@ -25,12 +25,20 @@
       <button data-l="en" lang="en">EN</button>
       <button data-l="it" lang="it">IT</button>
     </div>
-    <button class="theme" id="theme" type="button">
+    <button class="ibtn theme" id="theme" type="button">
       <svg class="i-moon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13.5 9.6A5.75 5.75 0 0 1 6.4 2.5a5.75 5.75 0 1 0 7.1 7.1z"/></svg>
       <svg class="i-sun" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.06 1.06M11.54 11.54l1.06 1.06M3.4 12.6l1.06-1.06M11.54 4.46l1.06-1.06"/></svg>
     </button>
+    <button class="ibtn" id="share" type="button">
+      <svg class="i-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6.6 9.4a2.6 2.6 0 0 0 3.7 0l2.4-2.4a2.6 2.6 0 0 0-3.7-3.7l-.9.9M9.4 6.6a2.6 2.6 0 0 0-3.7 0L3.3 9a2.6 2.6 0 0 0 3.7 3.7l.9-.9"/></svg>
+      <svg class="i-ok" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>
+    </button>
   </div>
   <p class="sub" data-i18n="sub"></p>
+  <button class="pill tour" id="tourBtn" type="button">
+    <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 1.4v9.2a.7.7 0 0 0 1.06.6l7.6-4.6a.7.7 0 0 0 0-1.2L3.56.8a.7.7 0 0 0-1.06.6z"/></svg>
+    <span data-i18n="tour"></span><small id="tourN"></small>
+  </button>
 </header>
 
 <section class="pulse" aria-label="EU27">
@@ -45,7 +53,7 @@
     <!-- header of the year chart: its label on the left, its one action on the right -->
     <div class="years-head">
       <p class="ctl-lbl" id="yearLbl" data-i18n="year"></p>
-      <button class="play" id="play" type="button">
+      <button class="pill play" id="play" type="button">
         <svg class="i-play" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 1.4v9.2a.7.7 0 0 0 1.06.6l7.6-4.6a.7.7 0 0 0 0-1.2L3.56.8a.7.7 0 0 0-1.06.6z"/></svg>
         <svg class="i-pause" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" rx=".8"/><rect x="7" y="1.5" width="3" height="9" rx=".8"/></svg>
         <span id="playTxt"></span>
@@ -58,7 +66,13 @@
 
 <div class="filters">
   <div class="ctl">
-    <label class="ctl-lbl" for="ind" data-i18n="indicator"></label>
+    <div class="ctl-head">
+      <label class="ctl-lbl" for="ind" data-i18n="indicator"></label>
+      <button class="info" id="info" type="button" aria-haspopup="dialog">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.2v4M8 4.6v.1"/></svg>
+        <span data-i18n="define"></span>
+      </button>
+    </div>
     <select id="ind"></select>
   </div>
   <div class="ctl">
@@ -79,6 +93,12 @@
 
 <main class="grid">
   <figure class="mapwrap">
+    <!-- find a country: a native datalist gives the suggestions -->
+    <div class="find">
+      <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4L14 14"/></svg>
+      <input id="find" type="search" list="findList" autocomplete="off" spellcheck="false" enterkeyhint="go">
+      <datalist id="findList"></datalist>
+    </div>
     <!-- map or globe: a control of the map panel itself -->
     <div class="seg views" id="views" role="group">
       <button data-v="map"></button>
@@ -101,8 +121,8 @@
   </section>
 </main>
 
-<section class="gapsec" id="gapSec" aria-labelledby="gapTitle">
-  <div class="gap-head">
+<section class="sec" id="gapSec" aria-labelledby="gapTitle">
+  <div class="sec-head">
     <div>
       <h2 id="gapTitle" data-i18n="gapTitle"></h2>
       <p class="hint" id="gapSub"></p>
@@ -131,6 +151,59 @@
   <div class="tip" id="gapTip" role="status" hidden></div>
 </section>
 
+<section class="sec" id="xySec" aria-labelledby="xyTitle">
+  <div class="sec-head">
+    <div>
+      <h2 id="xyTitle" data-i18n="xyTitle"></h2>
+      <p class="hint" id="xySub"></p>
+    </div>
+    <div class="xy-axes">
+      <div class="ctl"><label class="ctl-lbl" for="xyX" data-i18n="xyX"></label><select id="xyX"></select></div>
+      <div class="ctl"><label class="ctl-lbl" for="xyY" data-i18n="xyY"></label><select id="xyY"></select></div>
+    </div>
+  </div>
+  <p class="hint" data-i18n="xyHint"></p>
+  <div class="xy" id="xy">
+    <p class="xy-ty" id="xyTy"></p>
+    <svg id="xySvg"></svg>
+    <p class="xy-tx" id="xyTx"></p>
+  </div>
+  <p class="note" id="xyNote"></p>
+  <div class="tip" id="xyTip" role="status" hidden></div>
+</section>
+
+<section class="sec" id="cmpSec" aria-labelledby="cmpTitle">
+  <div class="sec-head">
+    <div>
+      <h2 id="cmpTitle" data-i18n="cmpTitle" tabindex="-1"></h2>
+      <p class="hint" id="cmpSub"></p>
+    </div>
+    <div class="cmp-pick">
+      <ul class="chips" id="cmpChips"></ul>
+      <select id="cmpAdd"></select>
+    </div>
+  </div>
+  <div id="cmpBody"></div>
+</section>
+
+<section class="sec" id="dataSec" aria-labelledby="dataTitle">
+  <div class="sec-head">
+    <div>
+      <h2 id="dataTitle" data-i18n="dataTitle"></h2>
+      <p class="hint" id="dataSub"></p>
+    </div>
+    <button class="pill" id="csv" type="button">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v8M4.5 7.5L8 11l3.5-3.5M3 13.5h10"/></svg>
+      <span data-i18n="csv"></span>
+    </button>
+  </div>
+  <details id="dataDet">
+    <summary id="dataSum"></summary>
+    <div class="tbl-wrap"><table class="tbl" id="dataTbl"></table></div>
+  </details>
+  <p class="note" id="dataNote"></p>
+</section>
+
 <aside class="series">
   <h2 data-i18n="seriesKicker"></h2>
   <p><span data-i18n="seriesText"></span> <a id="part1" data-i18n="seriesLink"></a></p>
@@ -139,6 +212,29 @@
 <footer class="ft">
   <p><span data-i18n="source"></span> Eurostat, <span data-i18n="dataset"></span> <a id="srcLink"><code>isoc_eb_ai</code></a> <span data-i18n="and"></span> <a id="srcLink2"><code>isoc_eb_ain2</code></a>, <span data-i18n="extracted"></span> <span id="extracted">—</span>.</p>
   <p><span data-i18n="builtBy"></span> <a id="author"></a> · <span data-i18n="privacy"></span></p>
+  <p class="keys" id="keys"></p>
 </footer>
+<p class="toast" id="say" role="status" aria-live="polite"></p>
+
+<dialog class="def" id="def" aria-labelledby="defTitle">
+  <div class="def-head">
+    <h2 id="defTitle"></h2>
+    <button class="ibtn" id="defClose" type="button"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <div id="defBody"></div>
+</dialog>
+
+<section class="tourcard" id="tour" aria-labelledby="tourTitle" hidden>
+  <div class="tour-head">
+    <h2 id="tourTitle" data-i18n="tour"></h2>
+    <span class="tour-n" id="tourStep"></span>
+    <button class="ibtn" id="tourClose" type="button"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <p class="tour-text" id="tourText" aria-live="polite"></p>
+  <div class="tour-nav">
+    <button class="pill" id="tourPrev" type="button"></button>
+    <button class="pill on" id="tourNext" type="button"></button>
+  </div>
+</section>
 </body>
 </html>
