@@ -54,6 +54,11 @@
     <label class="ctl-lbl" for="ind" data-i18n="indicator"></label>
     <select id="ind"></select>
   </div>
+  <div class="ctl ctl-sec">
+    <label class="ctl-lbl" for="sector" data-i18n="sector"></label>
+    <select id="sector"></select>
+  </div>
+  <span class="brk" aria-hidden="true"></span>
   <div class="ctl">
     <p class="ctl-lbl" id="sizeLbl" data-i18n="size"></p>
     <div class="seg" id="sizes" role="group" aria-labelledby="sizeLbl">
@@ -63,13 +68,14 @@
       <button data-s="large"></button>
     </div>
   </div>
-  <div class="ctl">
+  <div class="ctl ctl-view">
     <p class="ctl-lbl" id="viewLbl" data-i18n="view"></p>
     <div class="seg" id="views" role="group" aria-labelledby="viewLbl">
       <button data-v="map"></button>
       <button data-v="globe"></button>
     </div>
   </div>
+  <p class="ctl-note" id="sizeNote" data-i18n="sectorNote" hidden></p>
 </div>
 
 <main class="grid">
@@ -91,13 +97,43 @@
   </section>
 </main>
 
+<section class="gapsec" id="gapSec" aria-labelledby="gapTitle">
+  <div class="gap-head">
+    <div>
+      <h2 id="gapTitle" data-i18n="gapTitle"></h2>
+      <p class="hint" id="gapSub"></p>
+    </div>
+    <div class="ctl">
+      <p class="ctl-lbl" id="sortLbl" data-i18n="sortBy"></p>
+      <div class="seg" id="gapSort" role="group" aria-labelledby="sortLbl">
+        <button data-o="gap"></button>
+        <button data-o="small"></button>
+        <button data-o="large"></button>
+      </div>
+    </div>
+  </div>
+  <p class="gap-key" id="gapKey"></p>
+  <p class="hint" id="gapHint" data-i18n="gapHint"></p>
+  <div id="gapBody">
+    <div class="gap-axis" id="gapAxis" aria-hidden="true"></div>
+    <div class="gap-row gap-eu" id="gapEu">
+      <span class="nm"><i class="eu-dot"></i><span class="cn" data-i18n="eu"></span></span>
+      <span class="trk"><i class="ln"></i><i class="dt small"></i><i class="dt medium"></i><i class="dt large"></i></span>
+      <span class="val"></span>
+    </div>
+    <ol class="gap-list" id="gapList"></ol>
+  </div>
+  <p class="note" id="gapNote"></p>
+  <div class="tip" id="gapTip" role="status" hidden></div>
+</section>
+
 <aside class="series">
   <h2 data-i18n="seriesKicker"></h2>
   <p><span data-i18n="seriesText"></span> <a id="part1" data-i18n="seriesLink"></a></p>
 </aside>
 
 <footer class="ft">
-  <p><span data-i18n="source"></span> <a id="srcLink">Eurostat</a>, <span data-i18n="dataset"></span> <code>isoc_eb_ai</code>, <span data-i18n="extracted"></span> <span id="extracted">—</span>.</p>
+  <p><span data-i18n="source"></span> Eurostat, <span data-i18n="dataset"></span> <a id="srcLink"><code>isoc_eb_ai</code></a> <span data-i18n="and"></span> <a id="srcLink2"><code>isoc_eb_ain2</code></a>, <span data-i18n="extracted"></span> <span id="extracted">—</span>.</p>
   <p><span data-i18n="builtBy"></span> <a id="author"></a> · <span data-i18n="privacy"></span></p>
 </footer>
 </body>
