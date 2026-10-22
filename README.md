@@ -9,7 +9,7 @@ How fast is AI spreading through European businesses? An interactive map of the 
 ## Features
 
 - **Choropleth map of Europe**: the 27 EU member states plus the non-EU countries Eurostat surveys (tagged "non-EU"), coloured in five bands set per indicator. Countries without a value are hatched, never shown as zero. Hover or tap a country for its value, its rank, the change since the previous survey year and any Eurostat note (e.g. break in series).
-- **EU27 headline and trend**: the EU27 figure for the current view, with its change in percentage points. The year buttons double as a small bar chart of the EU27 trend, and **Play** steps through the survey years (2021, 2023, 2024, 2025).
+- **EU27 headline and trend**: the EU27 figure for the current view, with its change in percentage points. The year buttons double as a small bar chart of the EU27 trend, and **Play** steps through the survey years (2021, 2023, 2024, 2025). 2022 is shown as a marked gap, never estimated: Eurostat's survey that year had no AI questions.
 - **Company size filter**: all enterprises, small (10–49 employees), medium (50–249) or large (250+).
 - **26 indicators in four groups**, all from the same dataset, each shown with the base its percentage is computed on:
   - *Adoption*: uses at least one AI technology, 2+ or 3+ technologies (% of enterprises)

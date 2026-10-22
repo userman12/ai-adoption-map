@@ -29,7 +29,7 @@ const T = {
     title: "How fast is AI spreading through European businesses?",
     sub: "Share of enterprises (10+ employees) using at least one AI technology. Source: Eurostat.",
     year: "Year", size: "Company size", indicator: "Indicator", view: "View", map: "Map", globe: "Globe",
-    play: "Play", pause: "Pause",
+    play: "Play", pause: "Pause", skipped: (y) => `No data for ${y}: Eurostat's survey had no AI questions that year.`,
     sizes: { all: "All", small: "Small", medium: "Medium", large: "Large" },
     sizeLong: { all: "all enterprises", small: "small enterprises", medium: "medium enterprises", large: "large enterprises" },
     eu: "EU27", euAvg: "EU27 average", vs: "vs", pp: "pp", nonEU: "non-EU", noData: "No data",
@@ -61,7 +61,7 @@ const T = {
     title: "Quanto velocemente si diffonde l'AI nelle imprese europee?",
     sub: "Quota di imprese (10+ addetti) che usano almeno una tecnologia di AI. Fonte: Eurostat.",
     year: "Anno", size: "Dimensione d'impresa", indicator: "Indicatore", view: "Vista", map: "Mappa", globe: "Globo",
-    play: "Riproduci", pause: "Pausa",
+    play: "Riproduci", pause: "Pausa", skipped: (y) => `Nessun dato per il ${y}: quell'anno l'indagine Eurostat non conteneva domande sull'AI.`,
     sizes: { all: "Tutte", small: "Piccole", medium: "Medie", large: "Grandi" },
     sizeLong: { all: "tutte le imprese", small: "piccole imprese", medium: "medie imprese", large: "grandi imprese" },
     eu: "UE27", euAvg: "Media UE27", vs: "rispetto al", pp: "p.p.", nonEU: "extra-UE", noData: "Nessun dato",
@@ -159,6 +159,7 @@ function setLang(l) {
     (b.innerHTML = `${t.sizes[b.dataset.s]}<small>${SIZE_RANGE[b.dataset.s]}</small>`));
   document.querySelectorAll("#views button").forEach((b) => (b.textContent = t[b.dataset.v]));
   syncTheme();
+  Object.assign($("yearNote"), { hidden: !SKIPPED.length, textContent: SKIPPED.length ? t.skipped(SKIPPED.join(", ")) : "" });
   $("ind").innerHTML = GROUPS.map((g) => `<optgroup label="${t.groups[g.id]}">` +
     g.items.map((k) => `<option value="${k}">${t.ind[k]}</option>`).join("") + "</optgroup>").join("");
 }
@@ -184,8 +185,13 @@ $("part1").href = PART1_URL;
 Object.assign($("author"), { href: AUTHOR_URL, textContent: AUTHOR_NAME });
 $("srcLink").href = data.sourceUrl;
 $("extracted").textContent = data.extractedAt;
-$("years").innerHTML = ALL_YEARS.map((y) =>
-  `<button data-y="${y}"><span class="yv"></span><span class="col"></span><span class="yl">${y}</span></button>`).join("");
+// years inside the range that Eurostat didn't survey (2022: no AI questions) show as a marked gap, never a value
+const SKIPPED = d3.range(+ALL_YEARS[0], +ALL_YEARS.at(-1)).map(String).filter((y) => !ALL_YEARS.includes(y));
+$("years").innerHTML = ALL_YEARS.map((y, k) => {
+  const miss = SKIPPED.filter((g) => g > (ALL_YEARS[k - 1] ?? "") && g < y);
+  return (miss.length ? `<span class="ygap" aria-hidden="true"><span class="yl">${miss.join(" ")}</span></span>` : "") +
+    `<button data-y="${y}"><span class="yv"></span><span class="col"></span><span class="yl">${y}</span></button>`;
+}).join("");
 
 // ---- motion ----
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
