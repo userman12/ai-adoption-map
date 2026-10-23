@@ -101,10 +101,17 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 }
 
 /* filters: what to show (indicator, sector) and how to slice it (size); one row on wide screens */
-.filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 20px;align-items:end;margin:20px 0 16px}
+.filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 16px;align-items:end;margin:20px 0 16px}
 .ctl-size{grid-column:1/-1;justify-self:start} /* the size control keeps its own width */
+/* from 920px the filters line up with the map and the ranking below them (.grid: 1.6fr | 1fr, 16px apart) */
+@media (min-width:920px){
+  .filters{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+  .ctl-size{grid-column:1;justify-self:stretch} /* under the indicator, as wide as the map */
+  #sizes button{flex:1 1 auto}
+}
+/* from 1100px one row: indicator and sector over the map, size over the ranking at its exact width, (100% - gap) / 2.6 */
 @media (min-width:1100px){
-  .filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
+  .filters{grid-template-columns:minmax(0,1fr) minmax(0,1fr) calc((100% - 16px) / 2.6)}
   .ctl-size{grid-column:auto}
 }
 select{font:inherit;font-size:14px;font-weight:500;color:var(--ink);background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23808a9b' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center;
