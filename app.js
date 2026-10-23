@@ -232,6 +232,10 @@ const val = (i, c, s, y, n) => src(i, n).values[c]?.[s]?.[y];
 const flag = (i, c, s, y, n) => src(i, n).flags[c]?.[s]?.[y];
 const yearsOf = (i, n) => src(i, n).years.map(String);
 const prevYear = (i, y) => { const ys = yearsOf(i); return ys[ys.indexOf(y) - 1]; };
+// the layout holds still while the years play: a list keeps room for its longest year (has = country has a row that year),
+// and a note stacks every year's text in one grid cell (.stack), showing only the current one
+const most = (has) => d3.max(yearsOf(state.i), (yy) => covered.filter((c) => has(c, yy)).length) ?? 0;
+const byYear = (el, text) => { el.innerHTML = yearsOf(state.i).map((yy) => `<span${yy === state.y ? "" : ' class="off"'}>${text(yy)}</span>`).join(""); };
 // round half up on the decimal value (19.95 -> 20.0, as Eurostat publishes), not on its binary float
 const r1 = (v) => Math.round(Number((v * 10).toPrecision(12))) / 10;
 const low = (x) => x[0].toLocaleLowerCase(state.l) + x.slice(1); // a label used mid-sentence
@@ -528,11 +532,12 @@ function profileHtml(c) {
     ["all", ...SECTORS.slice(1).sort(desc((k) => cell(k)[0]))].map((k) =>
       prow(`data-n="${k}"`, k === n, k === "all" ? t.sectorAll : t.sectors[k], ...cell(k), ceil10(secVals))).join("") + "</ul></section>";
   const sections = GROUPS.map((g) => {
-    // highest first; ties broken by EU27 value
-    const items = g.items.filter((k) => yearsOf(k).includes(y))
+    // rows: every indicator with a value in any year the selector offers, so the card keeps its rows while the years play;
+    // highest first, ties broken by EU27 value
+    const items = g.items.filter((k) => yearsOf(i).some((yy) => val(k, c, s, yy) != null || val(k, "EU27", s, yy) != null))
       .sort((a, b) => desc((k) => val(k, c, s, y))(a, b) || desc((k) => val(k, "EU27", s, y))(a, b));
     const vals = items.flatMap((k) => [val(k, c, s, y), val(k, "EU27", s, y)]).filter((x) => x != null);
-    if (!vals.length) return `<section class="cp-sec"><h3>${t.groups[g.id]}</h3><p class="note">${t.notSurveyed(y)}</p></section>`;
+    if (!items.length) return `<section class="cp-sec"><h3>${t.groups[g.id]}</h3><p class="note">${t.notSurveyed(y)}</p></section>`;
     const row = (k) => prow(`data-i="${k}"`, k === i, t.short[k] ?? t.ind[k], val(k, c, s, y), val(k, "EU27", s, y), flag(k, c, s, y), ceil10(vals), t.ind[k]);
     const list = (ks, base, note) => (ks.length ? `<p class="cp-base">${t.base[base]}</p>${note ? `<p class="cp-base">${note}</p>` : ""}<ul>${ks.map(row).join("")}</ul>` : "");
     // an item on another base ("considered using AI": a share of non-users) leads its group under its own base line
@@ -567,14 +572,16 @@ $("profile").addEventListener("pointerout", (e) => {
 let gapSort = "gap", gapFor = null;
 const GROW = 26; // row height, px
 const gapSec = $("gapSec"), gapTip = $("gapTip");
-const sizesOf = (c) => BANDS.map((b) => val(state.i, c, b, state.y, "all"));
+const sizesAt = (c, y) => BANDS.map((b) => val(state.i, c, b, y, "all"));
+const sizesOf = (c) => sizesAt(c, state.y);
 const gapOf = (c) => { const [sm, , lg] = sizesOf(c); return lg - sm; };
-const hasGap = (c) => { const [sm, , lg] = sizesOf(c); return sm != null && lg != null; };
+const hasGapAt = (c, y) => { const [sm, , lg] = sizesAt(c, y); return sm != null && lg != null; };
+const hasGap = (c) => hasGapAt(c, state.y);
 function gapHtml(c) {
   const vs = sizesOf(c);
   return `<span class="m ind">${t.ind[state.i]}, ${state.y}</span><b>${c === "EU27" ? t.eu : name(c)}</b>` +
     BANDS.map((b, j) => `<br>${t.sizes[b]} <span class="m">${SIZE_RANGE[b]}</span> ${vs[j] == null ? t.noData : pct(vs[j])}`).join("") +
-    `<br>${t.gap}: <b>${pp(vs[2] - vs[0])}</b>`;
+    `<br>${t.gap}: <b>${hasGap(c) ? pp(vs[2] - vs[0]) : t.noData}</b>`;
 }
 function renderGap() {
   const { i, y, n } = state, na = n !== "all"; // sectors have no size breakdown
@@ -596,9 +603,10 @@ function renderGap() {
     sel.select(".ln").style("left", (d) => at(d3.min(sizesOf(d)))).style("width", (d) => at(d3.max(sizesOf(d)) - d3.min(sizesOf(d))));
     sel.select(".val").text(shown);
   };
-  const eu = d3.select("#gapEu").datum("EU27").property("hidden", !hasGap("EU27")); // reference row, pinned on top
-  if (hasGap("EU27")) place(eu);
-  const li = d3.select("#gapList").style("height", `${list.length * GROW}px`)
+  const eu = d3.select("#gapEu").datum("EU27"), euGap = hasGap("EU27"); // reference row, pinned on top; "–" when a size has no EU27 value
+  eu.select(".trk").style("visibility", euGap ? null : "hidden");
+  if (euGap) place(eu); else eu.select(".val").text("–");
+  const li = d3.select("#gapList").style("height", `${most(hasGapAt) * GROW}px`)
     .selectAll("li").data(list, (d) => d)
     .join(
       (enter) => enter.append("li").style("opacity", 0).style("transform", (d, k) => `translateY(${k * GROW}px)`)
@@ -613,8 +621,7 @@ function renderGap() {
   li.select(".nm").selectAll(".tag").data((d) => (EU.has(d) ? [] : [d])).join("span").attr("class", "tag").text(t.nonEU);
   place(li);
   li.select("button").attr("aria-label", (d) => `${name(d)}: ${BANDS.map((b, j) => `${t.sizes[b]} ${sizesOf(d)[j] == null ? t.noData : pct(sizesOf(d)[j])}`).join(", ")}, ${t.gap} ${pp(gapOf(d))}`);
-  const missing = covered.filter((c) => !hasGap(c)).map(name);
-  $("gapNote").textContent = missing.length ? `${t.gapMissing(y)} ${missing.join(", ")}.` : "";
+  byYear($("gapNote"), (yy) => { const m = covered.filter((c) => !hasGapAt(c, yy)).map(name); return m.length ? `${t.gapMissing(yy)} ${m.join(", ")}.` : ""; });
   if (gapFor) gapTip.innerHTML = gapHtml(gapFor);
 }
 function showGapTip(c, row, clientX) {
@@ -790,9 +797,10 @@ function renderCmp() {
       `<span class="cb">${v == null ? "" : `<i style="width:${(v / max) * 100}%"></i>`}</span></td>`;
   };
   const groups = GROUPS.map((g) => {
-    const items = g.items.filter((x) => yearsOf(x).includes(y));
+    // rows: every indicator with a value in any year the selector offers, so the table keeps its rows while the years play
+    const items = g.items.filter((x) => yearsOf(i).some((yy) => cols.some((c) => val(x, c, s, yy) != null)));
     const vals = items.flatMap((x) => cols.map((c) => val(x, c, s, y))).filter((v) => v != null);
-    if (!vals.length) return "";
+    if (!items.length) return "";
     const max = ceil10(vals);
     return `<tbody><tr class="grp"><th colspan="${cols.length + 1}" scope="colgroup">${t.groups[g.id]}<small>${t.base[g.base]}</small></th></tr>` +
       items.map((x) => `<tr${x === i ? ' class="cur"' : ""}><th scope="row"><button class="cmp-i" type="button" data-i="${x}" aria-current="${x === i}">` +
@@ -818,7 +826,8 @@ $("cmpBody").addEventListener("click", (e) => {
 const xyBox = $("xy"), xySec = $("xySec"), xyTip = $("xyTip"), xySvg = d3.select("#xySvg");
 const xyGrid = xySvg.append("g").attr("class", "xg"), xyRef = xySvg.append("g"), xyDots = xySvg.append("g");
 let xyFor = null;
-const xyVals = (c) => [val(state.sx, c, state.s, state.y), val(state.sy, c, state.s, state.y)];
+const xyAt = (c, y) => [val(state.sx, c, state.s, y), val(state.sy, c, state.s, y)];
+const xyVals = (c) => xyAt(c, state.y);
 const extentOf = (k) => d3.extent([...covered, "EU27"].flatMap((c) => yearsOf(k).map((y) => val(k, c, state.s, y))).filter((v) => v != null));
 const xyName = (c) => (c === "EU27" ? t.eu : name(c));
 const xyHtml = (c) => { const [a, b] = xyVals(c);
@@ -830,15 +839,17 @@ function renderXY() {
   $("xyTy").textContent = `↑ ${t.ind[sy]} · ${t.base[baseOf(sy)]}`;
   $("xyTx").textContent = `${t.ind[sx]} · ${t.base[baseOf(sx)]} →`;
   const pts = covered.filter((c) => xyVals(c).every((v) => v != null));
-  xySvg.attr("display", pts.length ? null : "none");
-  if (!pts.length) {
-    hideXYTip();
-    const both = yearsOf(sx).filter((yy) => yearsOf(sy).includes(yy) && yearsOf(state.i).includes(yy));
-    $("xyNote").innerHTML = `${t.xyNone(y)} ${both.length ? `${t.xyYears} ${both.map((yy) => `<button class="linkish" type="button" data-y="${yy}">${yy}</button>`).join(" ")}` : ""}`;
-    return;
-  }
-  const missing = covered.filter((c) => !pts.includes(c)).map(name);
-  $("xyNote").textContent = missing.length ? `${t.xyMissing} ${missing.join(", ")}.` : "";
+  const both = yearsOf(sx).filter((yy) => yearsOf(sy).includes(yy) && yearsOf(state.i).includes(yy));
+  byYear($("xyNote"), (yy) => {
+    const p = covered.filter((c) => xyAt(c, yy).every((v) => v != null)), m = covered.filter((c) => !p.includes(c)).map(name);
+    if (!p.length) return `${t.xyNone(yy)} ${both.length ? `${t.xyYears} ${both.map((b) => `<button class="linkish" type="button" data-y="${b}">${b}</button>`).join(" ")}` : ""}`;
+    return m.length ? `${t.xyMissing} ${m.join(", ")}.` : "";
+  });
+  // a year without dots keeps its empty plot (the axes span every year), so the section keeps its height;
+  // the plot goes only when an axis has no value in any year
+  const drawn = extentOf(sx)[0] != null && extentOf(sy)[0] != null;
+  xySvg.attr("display", drawn ? null : "none");
+  if (!drawn) return hideXYTip();
   const w = xyBox.clientWidth, h = Math.round(Math.max(280, Math.min(440, w * 0.46))), m = { l: 42, r: 18, t: 12, b: 28 };
   const x = d3.scaleLinear().domain(extentOf(sx)).nice(w < 520 ? 4 : 6).range([m.l, w - m.r]);
   const yS = d3.scaleLinear().domain(extentOf(sy)).nice(5).range([h - m.b, m.t]);
@@ -1090,10 +1101,10 @@ function render() {
   // ranking: rows keyed by country slide to their new rank
   $("rankTitle").textContent = `${t.ranking} · ${cap(scope())} · ${y}`;
   const max = sc.max, euLeft = eu == null ? null : `${(eu / max) * 100}%`;
-  $("euRef").innerHTML = eu == null ? "" :
-    `<span class="n"></span><span class="nm"><i class="eu-dot"></i><span>${t.euAvg}</span></span><span class="bar"><span class="eu" style="left:${euLeft}"></span></span><span class="val">${pct(eu)}</span>`;
+  $("euRef").innerHTML = `<span class="n"></span><span class="nm"><i class="eu-dot"></i><span>${t.euAvg}</span></span>` +
+    `<span class="bar">${eu == null ? "" : `<span class="eu" style="left:${euLeft}"></span>`}</span><span class="val">${eu == null ? "–" : pct(eu)}</span>`;
   const at = (k) => `translateY(${k * ROW}px)`;
-  const li = d3.select("#rankList").style("height", `${rows.length * ROW}px`)
+  const li = d3.select("#rankList").style("height", `${most((k, yy) => val(i, k, s, yy) != null) * ROW}px`)
     .selectAll("li").data(rows, (d) => d)
     .join(
       (enter) => enter.append("li").style("opacity", 0).style("transform", (d, k) => at(k))
@@ -1112,9 +1123,9 @@ function render() {
   li.select(".val").html((d) => { const f = flag(i, d, s, y);
     return `${pct(val(i, d, s, y))}${f ? `<abbr title="${t.note}: ${flagText(f)}">*</abbr>` : ""}`; });
 
-  const missing = covered.filter((k) => val(i, k, s, y) == null).map(name);
-  $("missing").textContent = [missing.length ? `${t.noDataFor(y)} ${missing.join(", ")}.` : "",
-    rows.some((k) => flag(i, k, s, y)) ? t.flagFoot : ""].filter(Boolean).join(" ");
+  byYear($("missing"), (yy) => { const m = covered.filter((k) => val(i, k, s, yy) == null).map(name);
+    return [m.length ? `${t.noDataFor(yy)} ${m.join(", ")}.` : "", covered.some((k) => flag(i, k, s, yy) && val(i, k, s, yy) != null) ? t.flagFoot : ""]
+      .filter(Boolean).join(" "); });
 
   renderGap();
   renderXY();
@@ -1125,7 +1136,7 @@ function render() {
 // ---- controls ----
 let timer = null;
 // the label says what a click does: "Play", or "Pause" while playing (filled)
-function syncPlay() { $("play").classList.toggle("on", !!timer); $("playTxt").textContent = timer ? t.pause : t.play; }
+function syncPlay() { $("play").classList.toggle("on", !!timer); }
 function stop() { clearInterval(timer); timer = null; syncPlay(); render(); }
 function set(patch) {
   const opened = patch.c && patch.c !== state.c, closed = "c" in patch && !patch.c && state.c;

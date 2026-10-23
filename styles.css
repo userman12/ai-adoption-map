@@ -61,7 +61,8 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .hero-key{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted)}
 .eu-dot{width:8px;height:8px;border-radius:50%;background:var(--eu);flex:none}
 .hero-num{font-weight:700;font-size:clamp(56px,13vw,84px);line-height:.95;letter-spacing:-.04em;margin:8px 0 6px}
-.hero-delta{font-size:14px;color:var(--muted)}
+/* keeps its line when empty (first year, no previous one), so the number above doesn't drop */
+.hero-delta{font-size:14px;color:var(--muted);min-height:1lh}
 .hero-delta b{color:var(--ink);font-weight:500}
 .ctl-lbl{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px}
 /* the year chart keeps its own width, so its header spans exactly the bars */
@@ -89,10 +90,11 @@ h1{font-weight:700;font-size:clamp(26px,5.6vw,44px);line-height:1.05;letter-spac
 .pill:hover:not(:disabled){border-color:var(--faint)}
 .pill.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .pill:disabled{opacity:.4;cursor:default}
-/* play/pause: the year chart's one action, in its header */
-.play{padding:0 12px 0 10px}
-.play .i-pause,.play.on .i-play{display:none}
-.play.on .i-pause{display:block}
+/* play/pause: the year chart's one action, in its header. Both faces sit in one grid cell,
+   so the button is as wide as the longer label and doesn't change size when clicked */
+.play{display:inline-grid;justify-items:center;padding:0 12px 0 10px}
+.play>span{grid-area:1/1;display:inline-flex;align-items:center;gap:6px}
+.play.on>span:first-child,.play:not(.on)>span:last-child{visibility:hidden}
 @media (min-width:760px){
   .pulse{grid-template-columns:1fr auto;gap:24px 32px}
   .ynote{grid-column:2;margin-top:-18px}
@@ -191,6 +193,11 @@ select:hover{border-color:var(--faint)}
 .euref{color:var(--eu-ink);font-weight:500;border-bottom:1px solid var(--line);margin-bottom:6px;padding:4px 0 8px}
 .euref .nm{gap:8px}
 .note{font-size:12.5px;color:var(--muted);margin-top:12px}
+/* a note that changes with the year holds every year's text in one grid cell and shows the current one:
+   it keeps the height of its longest year, so nothing below it moves while the years play */
+.stack{display:grid}
+.stack>*{grid-area:1/1}
+.stack>.off{visibility:hidden}
 
 /* small vs large: a row per country, one dot per size class on a shared axis */
 .sec{position:relative;margin-top:16px;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);scroll-margin-top:12px}
@@ -307,7 +314,7 @@ code{font-size:.92em}
 .sw.c{background:var(--b3)} .sw.e{background:var(--eu)}
 .cp-ind{font-size:13px;color:var(--muted)}
 .cp-num{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
-.cp-cmp{font-size:13px;color:var(--muted)} .cp-cmp b{color:var(--ink);font-weight:500}
+.cp-cmp{font-size:13px;color:var(--muted);min-height:1lh} .cp-cmp b{color:var(--ink);font-weight:500}
 .cp-sec{padding:14px 0 4px}
 .cp-sec h3{font-size:13.5px;font-weight:700;margin:0}
 .cp-base{font-size:12px;color:var(--muted);margin-bottom:6px}

@@ -53,10 +53,10 @@
     <!-- header of the year chart: its label on the left, its one action on the right -->
     <div class="years-head">
       <p class="ctl-lbl" id="yearLbl" data-i18n="year"></p>
+      <!-- both faces share one grid cell: the button keeps the width of the longer label -->
       <button class="pill play" id="play" type="button">
-        <svg class="i-play" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 1.4v9.2a.7.7 0 0 0 1.06.6l7.6-4.6a.7.7 0 0 0 0-1.2L3.56.8a.7.7 0 0 0-1.06.6z"/></svg>
-        <svg class="i-pause" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" rx=".8"/><rect x="7" y="1.5" width="3" height="9" rx=".8"/></svg>
-        <span id="playTxt"></span>
+        <span><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 1.4v9.2a.7.7 0 0 0 1.06.6l7.6-4.6a.7.7 0 0 0 0-1.2L3.56.8a.7.7 0 0 0-1.06.6z"/></svg><span data-i18n="play"></span></span>
+        <span><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" rx=".8"/><rect x="7" y="1.5" width="3" height="9" rx=".8"/></svg><span data-i18n="pause"></span></span>
       </button>
     </div>
     <div class="years" id="years" role="group" aria-labelledby="yearLbl" aria-describedby="yearNote"></div>
@@ -115,7 +115,7 @@
       <p class="hint" data-i18n="hint"></p>
       <div class="euref" id="euRef"></div>
       <ol id="rankList"></ol>
-      <p class="note" id="missing"></p>
+      <p class="note stack" id="missing"></p>
     </div>
     <div class="profile" id="profile" hidden></div>
   </section>
@@ -147,7 +147,7 @@
     </div>
     <ol class="gap-list" id="gapList"></ol>
   </div>
-  <p class="note" id="gapNote"></p>
+  <p class="note stack" id="gapNote"></p>
   <div class="tip" id="gapTip" role="status" hidden></div>
 </section>
 
@@ -168,7 +168,7 @@
     <svg id="xySvg"></svg>
     <p class="xy-tx" id="xyTx"></p>
   </div>
-  <p class="note" id="xyNote"></p>
+  <p class="note stack" id="xyNote"></p>
   <div class="tip" id="xyTip" role="status" hidden></div>
 </section>
 
