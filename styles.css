@@ -151,6 +151,11 @@ select:hover{border-color:var(--faint)}
   font:inherit;font-size:13.5px;color:var(--ink)}
 #find::placeholder{color:var(--muted);opacity:1}
 #find:focus-visible{outline:2px solid var(--focus);outline-offset:0}
+/* suggestions: about seven rows, then the list scrolls; a bit wider than the field on phones so names stay on one line */
+#findList{position:absolute;top:calc(100% + 4px);left:0;width:max(100%,200px);max-height:240px;overflow-y:auto;overscroll-behavior:contain;
+  margin:0;padding:4px;list-style:none;border-radius:10px;background:var(--panel);box-shadow:var(--float)}
+#findList li{padding:7px 10px;border-radius:6px;font-size:13.5px;cursor:pointer}
+#findList li:hover,#findList li[aria-selected=true]{background:color-mix(in srgb,var(--b1) 22%,transparent)}
 .ctry.mark{stroke:var(--ink);stroke-width:2.2}
 .land{fill:var(--land);stroke:var(--edge);stroke-width:.5}
 .ctry{stroke:var(--edge);stroke-width:.7;cursor:pointer;outline:none;transition:fill .5s}
@@ -340,7 +345,7 @@ code{font-size:.92em}
 .eu-tick{display:inline-block;width:2px;height:12px;background:var(--eu);border-radius:1px}
 @media (max-width:540px){.prow{grid-template-columns:minmax(0,1fr) 30% 3.2em;gap:6px}}
 @media (max-width:540px){.prow{padding:5px 6px}}
-@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.ibtn{width:42px;height:42px}.pill{height:40px;padding:0 16px}.play{padding:0 16px 0 14px}.prow{min-height:40px}#find{height:42px}}
+@media (pointer:coarse){.lang button{min-height:36px;padding:0 14px}.ibtn{width:42px;height:42px}.pill{height:40px;padding:0 16px}.play{padding:0 16px 0 14px}.prow{min-height:40px}#find{height:42px}#findList li{padding:11px 10px}}
 
 /* two indicators: a dot per country */
 .xy-axes{display:grid;grid-template-columns:repeat(2,minmax(0,16rem));gap:10px 14px}

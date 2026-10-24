@@ -311,7 +311,7 @@ function setLang(l) {
     g.items.map((k) => `<option value="${k}">${t.ind[k]}</option>`).join("") + "</optgroup>").join("");
   for (const id of ["ind", "xyX", "xyY"]) $(id).innerHTML = opts;
   Object.assign($("find"), { placeholder: t.find, ariaLabel: t.find });
-  $("findList").innerHTML = covered.map(name).sort((a, b) => a.localeCompare(b, l)).map((x) => `<option value="${x}"></option>`).join("");
+  $("findList").ariaLabel = t.find;
   for (const [id, label] of [["share", t.shareView], ["defClose", t.defClose], ["tourClose", t.tourClose]]) Object.assign($(id), { title: label, ariaLabel: label });
   $("cmpAdd").ariaLabel = t.cmpAdd;
   $("keys").innerHTML = t.keys;
@@ -999,27 +999,56 @@ $("tourNext").addEventListener("click", () => (tourK >= tourSteps().length - 1 ?
 $("tourPrev").addEventListener("click", () => { showStep(tourK - 1); if ($("tourPrev").disabled) $("tourNext").focus({ preventScroll: true }); });
 $("tourClose").addEventListener("click", endTour);
 
-// ---- find a country: the native datalist suggests names in the page language ----
+// ---- find a country: the names that match, in the page language, in a short list under the field ----
 const fold = (x) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-const find = $("find");
-function lookup(q) { // exact name or code first, then the start of a name, then anywhere in it
-  const f = fold(q), list = covered.map((c) => [c, fold(name(c))]);
-  if (!f) return null;
-  return (list.find(([c, nm]) => nm === f || fold(c) === f) ?? list.find(([, nm]) => nm.startsWith(f)) ?? list.find(([, nm]) => nm.includes(f)))?.[0] ?? null;
+const find = $("find"), findList = $("findList");
+let hits = [], active = -1;
+function matches(q) { // exact name or code first, then the start of a name, then anywhere in it; A-Z within each
+  const f = fold(q), rank = (c) => { const nm = fold(name(c)); return nm === f || fold(c) === f ? 0 : nm.startsWith(f) ? 1 : nm.includes(f) ? 2 : 3; };
+  return covered.map((c) => [rank(c), c]).filter(([r]) => r < 3)
+    .sort(([ra, a], [rb, b]) => ra - rb || name(a).localeCompare(name(b), document.documentElement.lang)).map(([, c]) => c);
 }
-function go(c) { find.value = ""; find.setCustomValidity(""); openCountry(c); }
+function pickOption(k) { // highlight option k (-1: none) and scroll it into the list's view
+  active = k;
+  [...findList.children].forEach((li, j) => li.setAttribute("aria-selected", j === k));
+  const li = findList.children[k];
+  if (!li) return find.removeAttribute("aria-activedescendant");
+  find.setAttribute("aria-activedescendant", li.id);
+  if (li.offsetTop < findList.scrollTop) findList.scrollTop = li.offsetTop - 4;
+  else if (li.offsetTop + li.offsetHeight > findList.scrollTop + findList.clientHeight) findList.scrollTop = li.offsetTop + li.offsetHeight - findList.clientHeight + 4;
+}
+function suggest(q, k = q.trim() ? 0 : -1) { // with text typed, the first match is highlighted and Enter takes it
+  hits = matches(q);
+  findList.innerHTML = hits.map((c) => `<li role="option" id="find-${c}" data-c="${c}">${name(c)}</li>`).join("");
+  findList.hidden = !hits.length; find.setAttribute("aria-expanded", hits.length > 0);
+  findList.scrollTop = 0; pickOption(k);
+}
+function closeList() { findList.hidden = true; find.setAttribute("aria-expanded", false); pickOption(-1); }
+function go(c) { find.value = ""; find.setCustomValidity(""); closeList(); openCountry(c); }
 find.addEventListener("input", () => {
   find.setCustomValidity("");
-  const c = covered.find((x) => fold(name(x)) === fold(find.value)); // a suggestion picked, or a whole name typed
-  if (c) go(c);
+  const c = covered.find((x) => fold(name(x)) === fold(find.value)); // a whole name typed
+  if (c) go(c); else if (find.value.trim()) suggest(find.value); else closeList();
 });
+find.addEventListener("click", () => findList.hidden && suggest(find.value));
+find.addEventListener("blur", closeList);
 find.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    if (findList.hidden) suggest(find.value, 0);
+    else pickOption(Math.min(Math.max(active + (e.key === "ArrowDown" ? 1 : -1), 0), hits.length - 1));
+    return;
+  }
+  // Esc closes the list and keeps the text (and the open profile); a second Esc clears the field as usual
+  if (e.key === "Escape" && !findList.hidden) { e.preventDefault(); e.stopPropagation(); closeList(); return; }
   if (e.key !== "Enter") return;
   e.preventDefault();
-  const c = lookup(find.value);
+  const c = hits[active] ?? (find.value.trim() ? matches(find.value)[0] : null);
   if (c) go(c);
   else if (find.value.trim()) { find.setCustomValidity(t.findNone(find.value.trim())); find.reportValidity(); }
 });
+findList.addEventListener("mousedown", (e) => e.preventDefault()); // a click in the list keeps the focus in the field
+findList.addEventListener("click", (e) => { const li = e.target.closest("li"); if (li) go(li.dataset.c); });
 
 // ---- keyboard: ←/→ year, Space play/pause, / or Cmd/Ctrl+K find; ignored while typing in a field ----
 document.addEventListener("keydown", (e) => {

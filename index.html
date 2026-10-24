@@ -93,11 +93,11 @@
 
 <main class="grid">
   <figure class="mapwrap">
-    <!-- find a country: a native datalist gives the suggestions -->
+    <!-- find a country: a combobox with a short suggestion list that scrolls (a native datalist can't be sized) -->
     <div class="find">
       <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4L14 14"/></svg>
-      <input id="find" type="search" list="findList" autocomplete="off" spellcheck="false" enterkeyhint="go">
-      <datalist id="findList"></datalist>
+      <input id="find" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="findList" autocomplete="off" spellcheck="false" enterkeyhint="go">
+      <ul id="findList" role="listbox" tabindex="-1" hidden></ul>
     </div>
     <!-- map or globe: a control of the map panel itself -->
     <div class="seg views" id="views" role="group">
