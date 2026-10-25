@@ -151,6 +151,10 @@ select:hover{border-color:var(--faint)}
   font:inherit;font-size:13.5px;color:var(--ink)}
 #find::placeholder{color:var(--muted);opacity:1}
 #find:focus-visible{outline:2px solid var(--focus);outline-offset:0}
+/* empty field: drop the clear button, which Chrome keeps (invisible) beside the placeholder and cuts it short */
+#find:placeholder-shown::-webkit-search-cancel-button{display:none}
+/* phones: a slimmer map/globe toggle leaves the field room for its whole placeholder */
+@media (max-width:540px){.find{width:calc(100% - 164px)} .mapwrap .views button{padding:4px 9px}}
 /* suggestions: about seven rows, then the list scrolls; a bit wider than the field on phones so names stay on one line */
 #findList{position:absolute;top:calc(100% + 4px);left:0;width:max(100%,200px);max-height:240px;overflow-y:auto;overscroll-behavior:contain;
   margin:0;padding:4px;list-style:none;border-radius:10px;background:var(--panel);box-shadow:var(--float)}
