@@ -76,3 +76,7 @@ There is no build step. Any static host works; this one is GitHub Pages, from th
 - Map: [world-atlas](https://github.com/topojson/world-atlas) (ISC licence), from Natural Earth (public domain).
 - Libraries: [D3](https://d3js.org) (ISC) and [TopoJSON](https://github.com/topojson/topojson-client) (ISC), loaded from cdnjs.
 - Typeface: [Schibsted Grotesk](https://github.com/schibsted/schibsted-grotesk), SIL Open Font License 1.1 (`fonts/OFL.txt`).
+
+## License
+
+The code is under the [MIT License](LICENSE). The data belong to Eurostat, and the typeface, map and libraries keep their own licences (see Credits).
