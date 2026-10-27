@@ -1,6 +1,6 @@
 # AI Adoption Map
 
-How fast is AI spreading through European businesses? An interactive map of the share of enterprises (10+ employees) using AI, by country, company size and sector, 2021 to today, with 35 more Eurostat indicators on technologies, uses, sourcing, digital intensity and barriers.
+How fast is AI spreading through European businesses? An interactive map of the share of enterprises (10+ employees) using AI, by country, company size and sector, 2021 to today, with 35 more Eurostat indicators on technologies, uses, sourcing, digital intensity and barriers. In English and Italian, on desktop and phone.
 
 ## Live demo
 
@@ -42,15 +42,37 @@ How fast is AI spreading through European businesses? An interactive map of the 
 
 Eurostat, datasets [`isoc_eb_ai`](https://ec.europa.eu/eurostat/databrowser/view/isoc_eb_ai/default/table) (by country and size) and [`isoc_eb_ain2`](https://ec.europa.eu/eurostat/databrowser/view/isoc_eb_ain2/default/table) (by sector). The data files also carry Eurostat's English label for every indicator, shown in the definition dialog. The definition of AI quoted there comes from Eurostat's [Statistics Explained article](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Use_of_artificial_intelligence_in_enterprises).
 
-The browser only reads `data/ai-adoption.json` and `data/ai-sectors.json`; to refresh them:
+The page shows only what Eurostat publishes. Missing values stay missing: no zeros, estimates, interpolation or forecasts. The footer gives the extraction date. The current files match Eurostat's release of 15 June 2026, which covers the survey years 2021, 2023, 2024 and 2025.
+
+The browser only reads `data/ai-adoption.json` and `data/ai-sectors.json`. To refresh them (Node 18+, no dependencies):
 
 ```sh
 node scripts/fetch-data.mjs     # download from Eurostat
-node scripts/validate-data.mjs  # check ranges and spot values
+node scripts/validate-data.mjs  # check ranges, EU27 coverage, digital-intensity sums and spot values
 ```
+
+`validate-data.mjs` fails on any value outside 0–100 and on any indicator or sector without EU27 values. It also checks the 2025 figures against Eurostat's published ones: EU27 20.0% overall, and 17.0%, 30.4% and 55.0% for small, medium and large enterprises. After a refresh, retake `og.png`, the link preview image. It is a 1200×630 screenshot of the page's headline area in English, light theme.
 
 ## Run locally
 
 ```sh
 python3 -m http.server 8000     # then open http://localhost:8000
 ```
+
+There is no build step. Any static host works; this one is GitHub Pages, from the `main` branch.
+
+## Files
+
+- `index.html`: the page, with every text slot filled by `app.js`.
+- `app.js`: data loading, the English and Italian texts, the map and globe, the charts, the URL state.
+- `styles.css`: layout, light and dark themes.
+- `data/`: the two Eurostat extracts. `scripts/`: fetch and validate them.
+- `fonts/`: Schibsted Grotesk (400, 500, 700, Latin), self-hosted, with its licence.
+- `favicon.svg`: the tab icon, the EU27 share in the four survey years drawn to scale. `og.png`: the link preview.
+
+## Credits
+
+- Data: [Eurostat](https://ec.europa.eu/eurostat). Reuse is allowed with the source acknowledged, under Eurostat's [copyright notice](https://ec.europa.eu/eurostat/help/copyright-notice). The page only rounds values for display; the CSV keeps every decimal.
+- Map: [world-atlas](https://github.com/topojson/world-atlas) (ISC licence), from Natural Earth (public domain).
+- Libraries: [D3](https://d3js.org) (ISC) and [TopoJSON](https://github.com/topojson/topojson-client) (ISC), loaded from cdnjs.
+- Typeface: [Schibsted Grotesk](https://github.com/schibsted/schibsted-grotesk), SIL Open Font License 1.1 (`fonts/OFL.txt`).

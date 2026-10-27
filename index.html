@@ -4,7 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Adoption Map</title>
-<meta name="description" content="How fast is AI spreading through European businesses? Share of enterprises (10+ employees) using at least one AI technology, by country, 2021 to today. Source: Eurostat.">
+<meta name="description" content="How fast is AI spreading through European businesses? An interactive map of Eurostat data on enterprises (10+ employees) using AI, by country, company size and sector since 2021, with 36 indicators. In English and Italian.">
+<link rel="canonical" href="https://userman12.github.io/ai-adoption-map/">
+<!-- link previews (social networks, chat apps): og.png is the page's own headline, rendered from the data -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AI Adoption Map">
+<meta property="og:title" content="AI Adoption Map: how fast is AI spreading through European businesses?">
+<meta property="og:description" content="How fast is AI spreading through European businesses? An interactive map of Eurostat data on enterprises (10+ employees) using AI, by country, company size and sector since 2021, with 36 indicators. In English and Italian.">
+<meta property="og:url" content="https://userman12.github.io/ai-adoption-map/">
+<meta property="og:image" content="https://userman12.github.io/ai-adoption-map/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="In 2025, 20.0% of EU enterprises with 10+ employees used at least one AI technology, up from 7.7% in 2021. Source: Eurostat.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script>
@@ -42,6 +54,8 @@
   </button>
 </header>
 
+<!-- everything between the header and the footer: headline, filters and every chart -->
+<main>
 <section class="pulse" aria-label="EU27">
   <div class="hero">
     <p class="sr-only" id="heroSr" aria-live="polite"></p>
@@ -92,7 +106,7 @@
   <p class="ctl-note" id="sizeNote" data-i18n="sectorNote" hidden></p>
 </div>
 
-<main class="grid">
+<div class="grid">
   <figure class="mapwrap">
     <!-- find a country: a combobox with a short suggestion list that scrolls (a native datalist can't be sized) -->
     <div class="find">
@@ -120,7 +134,7 @@
     </div>
     <div class="profile" id="profile" hidden></div>
   </section>
-</main>
+</div>
 
 <section class="sec" id="gapSec" aria-labelledby="gapTitle">
   <div class="sec-head">
@@ -205,10 +219,12 @@
   </div>
   <details id="dataDet">
     <summary id="dataSum"></summary>
-    <div class="tbl-wrap"><table class="tbl" id="dataTbl"></table></div>
+    <!-- focusable so the keyboard can scroll it sideways on phones -->
+    <div class="tbl-wrap" tabindex="0" role="region" aria-labelledby="dataCap"><table class="tbl" id="dataTbl"></table></div>
   </details>
   <p class="note" id="dataNote"></p>
 </section>
+</main>
 
 <footer class="ft">
   <p><span data-i18n="source"></span> Eurostat, <span data-i18n="dataset"></span> <a id="srcLink"><code>isoc_eb_ai</code></a> <span data-i18n="and"></span> <a id="srcLink2"><code>isoc_eb_ain2</code></a>, <span data-i18n="extracted"></span> <span id="extracted">—</span>.</p>

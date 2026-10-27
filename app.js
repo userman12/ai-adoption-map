@@ -495,8 +495,9 @@ function trendHtml(c) {
     series.map(([k, p]) => p.map(([y, v]) => `<i class="tdot ${k}${String(y) === state.y ? " on" : ""}" style="left:${X(y)}%;top:${Y(v)}%"></i>`).join("")).join("") +
     `</div><div class="taxis" aria-hidden="true">` +
     d3.range(a, b + 1).map((y) => `<span class="${String(y) === state.y ? "on" : ys.includes(String(y)) ? "" : "gap"}" style="left:${X(y)}%">${y}</span>`).join("") +
-    // hover a year to read its values below, click it to select it
-    `</div><div class="tcols" aria-hidden="true">${ys.map((y) => `<span class="tcol" data-y="${y}" style="left:${X(+y - 0.5)}%;width:${X(a + 1)}%"></span>`).join("")}</div>` +
+    // hover a year to read its values below, click it to select it; a year's column runs half a year each side, cut at the plot's edges
+    `</div><div class="tcols" aria-hidden="true">${ys.map((y) => { const l = Math.max(0, X(+y - 0.5)), r = Math.min(100, X(+y + 0.5));
+      return `<span class="tcol" data-y="${y}" style="left:${l}%;width:${r - l}%"></span>`; }).join("")}</div>` +
     `</div><p class="tleg" id="tleg">${tleg(c, state.y)}</p>`;
 }
 const desc = (f) => (a, b) => (f(b) ?? -1) - (f(a) ?? -1); // highest first, no data last
@@ -924,7 +925,7 @@ function renderData() {
   const cell = (c, yy) => { const v = val(i, c, s, yy), f = flag(i, c, s, yy);
     if (f) seen.add(f);
     return `<td${cur(yy)}>${v == null ? "–" : pct(v)}${f ? `<sup title="${flagText(f)}">${f}</sup>` : ""}</td>`; };
-  $("dataTbl").innerHTML = `<caption class="sr-only">${t.ind[i]}, ${t.base[baseOf(i)]}, ${scope()}</caption>` +
+  $("dataTbl").innerHTML = `<caption class="sr-only" id="dataCap">${t.ind[i]}, ${t.base[baseOf(i)]}, ${scope()}</caption>` +
     `<thead><tr><th scope="col">${t.country}</th>${ys.map((yy) => `<th scope="col"${cur(yy)}>${yy}</th>`).join("")}</tr></thead><tbody>` +
     tableOrder().map((c) => `<tr${c === "EU27" ? ' class="eu"' : ""}><th scope="row">${c === "EU27" ? t.eu : name(c)}</th>${ys.map((yy) => cell(c, yy)).join("")}</tr>`).join("") +
     "</tbody>";
