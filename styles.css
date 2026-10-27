@@ -265,8 +265,6 @@ select:hover{border-color:var(--faint)}
 .gap-key .dt{position:static;margin:0;box-shadow:none}
 .trk .ln,.trk .dt{transition:left .55s cubic-bezier(.2,.7,.2,1),width .55s cubic-bezier(.2,.7,.2,1)}
 
-.series h2{font-size:15px;font-weight:700;margin:0}
-.series{margin:32px 0 0;padding:20px 0;border-top:1px solid var(--line);display:grid;gap:6px;max-width:60ch}
 .ft{font-size:13px;color:var(--muted);margin-top:24px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:4px}
 code{font-size:.92em}
 
@@ -295,8 +293,8 @@ code{font-size:.92em}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}}
 /* backwards, not both: once finished the animation leaves nothing behind, so the
    sections don't stay on their own GPU layers (that caused a flash on filter clicks) */
-.top,.pulse,.filters,.mapwrap,.rank,.series{animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards}
-.pulse{animation-delay:.08s} .filters{animation-delay:.14s} .mapwrap{animation-delay:.2s} .rank{animation-delay:.26s} .series{animation-delay:.32s}
+.top,.pulse,.filters,.mapwrap,.rank{animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards}
+.pulse{animation-delay:.08s} .filters{animation-delay:.14s} .mapwrap{animation-delay:.2s} .rank{animation-delay:.26s}
 .years .col{transition:height .55s cubic-bezier(.2,.7,.2,1),opacity .2s}
 .tip:not([hidden]){animation:pop .14s ease-out}
 @keyframes pop{from{opacity:0;transform:translateY(3px)}}

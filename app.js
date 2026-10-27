@@ -1,7 +1,3 @@
-const AUTHOR_NAME = "@userluke_";                  // da sostituire
-const AUTHOR_URL = "https://x.com/userluke_";       // da sostituire
-const PART1_URL = "https://userman12.github.io/internet-adoption-map";
-
 /* global d3, topojson (loaded as classic scripts from cdnjs) */
 
 // Eurostat countries in isoc_eb_ai -> world-atlas numeric id (ISO 3166-1 numeric).
@@ -61,10 +57,8 @@ const T = {
     notSurveyed: (y) => `No data for ${y}.`, rank: "Rank",
     mapLabel: "Map of Europe, coloured by the selected indicator. Tab through countries to read values, Enter opens the country profile.",
     globeLabel: "Globe centred on Europe, coloured by the selected indicator. Drag to rotate.",
-    seriesKicker: "Part 2 of a series",
-    seriesText: "Part 1 showed how long it took each country to go from 10% to 50% of people online. This one shows where businesses stand with AI.",
-    seriesLink: "See Part 1 →", source: "Source:", dataset: "datasets", and: "and", extracted: "extracted",
-    builtBy: "Built by", privacy: "No data is collected from visitors.", toDark: "Switch to dark theme", toLight: "Switch to light theme",
+    source: "Source:", dataset: "datasets", and: "and", extracted: "extracted",
+    privacy: "No data is collected from visitors.", toDark: "Switch to dark theme", toLight: "Switch to light theme",
     flags: { b: "Break in series", u: "Low reliability", bu: "Break in series, low reliability", d: "Definition differs", e: "Estimate", p: "Provisional", c: "Confidential" },
     groups: { adoption: "Adoption", tech: "Technologies", purpose: "What AI is used for", source: "How AI is obtained",
       dii: "AI users by digital intensity", barrier: "Why non-users hold back" },
@@ -147,10 +141,8 @@ const T = {
     notSurveyed: (y) => `Nessun dato per il ${y}.`, rank: "Posizione",
     mapLabel: "Mappa dell'Europa colorata secondo l'indicatore scelto. Usa Tab per leggere i valori, Invio apre la scheda del paese.",
     globeLabel: "Globo centrato sull'Europa, colorato secondo l'indicatore scelto. Trascina per ruotarlo.",
-    seriesKicker: "Seconda puntata di una serie",
-    seriesText: "La prima puntata mostrava quanto ha impiegato ogni paese a passare dal 10% al 50% di persone online. Questa mostra a che punto sono le imprese con l'AI.",
-    seriesLink: "Vedi la prima puntata →", source: "Fonte:", dataset: "dataset", and: "e", extracted: "estratti il",
-    builtBy: "Realizzato da", privacy: "Nessun dato viene raccolto dai visitatori.", toDark: "Passa al tema scuro", toLight: "Passa al tema chiaro",
+    source: "Fonte:", dataset: "dataset", and: "e", extracted: "estratti il",
+    privacy: "Nessun dato viene raccolto dai visitatori.", toDark: "Passa al tema scuro", toLight: "Passa al tema chiaro",
     flags: { b: "Interruzione di serie", u: "Bassa affidabilità", bu: "Interruzione di serie, bassa affidabilità", d: "Definizione diversa", e: "Stima", p: "Provvisorio", c: "Riservato" },
     groups: { adoption: "Adozione", tech: "Tecnologie", purpose: "Per cosa si usa l'AI", source: "Come si ottiene l'AI",
       dii: "Chi usa l'AI, per intensità digitale", barrier: "Perché chi non la usa si frena" },
@@ -341,8 +333,6 @@ systemDark.addEventListener("change", (e) => { // follow the system until the vi
 });
 
 // ---- static chrome ----
-$("part1").href = PART1_URL;
-Object.assign($("author"), { href: AUTHOR_URL, textContent: AUTHOR_NAME });
 $("srcLink").href = data.sourceUrl;
 $("srcLink2").href = sect.sourceUrl;
 $("extracted").textContent = data.extractedAt;

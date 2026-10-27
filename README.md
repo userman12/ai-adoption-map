@@ -1,6 +1,6 @@
 # AI Adoption Map
 
-How fast is AI spreading through European businesses? An interactive map of the share of enterprises (10+ employees) using AI, by country, company size and sector, 2021 to today, with 35 more Eurostat indicators on technologies, uses, sourcing, digital intensity and barriers. Part 2 of a series after the [Internet Adoption Map](https://userman12.github.io/internet-adoption-map/).
+How fast is AI spreading through European businesses? An interactive map of the share of enterprises (10+ employees) using AI, by country, company size and sector, 2021 to today, with 35 more Eurostat indicators on technologies, uses, sourcing, digital intensity and barriers.
 
 ## Live demo
 
