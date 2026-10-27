@@ -38,7 +38,7 @@ const T = {
   en: {
     title: "How fast is AI spreading through European businesses?",
     sub: "Share of enterprises (10+ employees) using at least one AI technology. Source: Eurostat.",
-    year: "Year", size: "Company size", indicator: "Indicator", view: "View", map: "Map", globe: "Globe",
+    year: "Year", size: "Company size", indicator: "Indicator",
     play: "Play", pause: "Pause", skipped: (y) => `No data for ${y}: Eurostat's survey had no AI questions that year.`,
     sector: "Sector", sectorAll: "All sectors", bySector: "By sector",
     sectors: { C: "Manufacturing", D_E: "Energy, water and waste", F: "Construction", G: "Wholesale and retail trade",
@@ -56,7 +56,6 @@ const T = {
     ranking: "Ranking", hint: "Select a country for its full profile.", back: "← Ranking", close: "Back to ranking",
     notSurveyed: (y) => `No data for ${y}.`, rank: "Rank",
     mapLabel: "Map of Europe, coloured by the selected indicator. Tab through countries to read values, Enter opens the country profile.",
-    globeLabel: "Globe centred on Europe, coloured by the selected indicator. Drag to rotate.",
     source: "Source:", dataset: "datasets", and: "and", extracted: "extracted",
     privacy: "No data is collected from visitors.", toDark: "Switch to dark theme", toLight: "Switch to light theme",
     flags: { b: "Break in series", u: "Low reliability", bu: "Break in series, low reliability", d: "Definition differs", e: "Estimate", p: "Provisional", c: "Confidential" },
@@ -122,7 +121,7 @@ const T = {
   it: {
     title: "Quanto velocemente si diffonde l'AI nelle imprese europee?",
     sub: "Quota di imprese (10+ addetti) che usano almeno una tecnologia di AI. Fonte: Eurostat.",
-    year: "Anno", size: "Dimensione d'impresa", indicator: "Indicatore", view: "Vista", map: "Mappa", globe: "Globo",
+    year: "Anno", size: "Dimensione d'impresa", indicator: "Indicatore",
     play: "Riproduci", pause: "Pausa", skipped: (y) => `Nessun dato per il ${y}: quell'anno l'indagine Eurostat non conteneva domande sull'AI.`,
     sector: "Settore", sectorAll: "Tutti i settori", bySector: "Per settore",
     sectors: { C: "Manifattura", D_E: "Energia, acqua e rifiuti", F: "Costruzioni", G: "Commercio all'ingrosso e al dettaglio",
@@ -140,7 +139,6 @@ const T = {
     ranking: "Classifica", hint: "Seleziona un paese per la scheda completa.", back: "← Classifica", close: "Torna alla classifica",
     notSurveyed: (y) => `Nessun dato per il ${y}.`, rank: "Posizione",
     mapLabel: "Mappa dell'Europa colorata secondo l'indicatore scelto. Usa Tab per leggere i valori, Invio apre la scheda del paese.",
-    globeLabel: "Globo centrato sull'Europa, colorato secondo l'indicatore scelto. Trascina per ruotarlo.",
     source: "Fonte:", dataset: "dataset", and: "e", extracted: "estratti il",
     privacy: "Nessun dato viene raccolto dai visitatori.", toDark: "Passa al tema scuro", toLight: "Passa al tema chiaro",
     flags: { b: "Interruzione di serie", u: "Bassa affidabilità", bu: "Interruzione di serie, bassa affidabilità", d: "Definizione diversa", e: "Stima", p: "Provvisorio", c: "Riservato" },
@@ -256,8 +254,7 @@ function scaleOf(i, n = state.n) {
 const bin = (i, v) => scaleOf(i).bins.filter((b) => v >= b).length;
 
 // ---- state <-> hash ----
-const VIEWS = ["map", "globe"];
-const state = { y: ALL_YEARS.at(-1), s: "all", l: "en", i: "any", v: "map", c: null, n: "all", k: [], sx: "any", sy: "ble" };
+const state = { y: ALL_YEARS.at(-1), s: "all", l: "en", i: "any", c: null, n: "all", k: [], sx: "any", sy: "ble" };
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   state.n = SECTORS.includes(p.get("n")) ? p.get("n") : "all";
@@ -265,15 +262,14 @@ function readHash() {
   state.y = yearsOf(state.i).includes(p.get("y")) ? p.get("y") : yearsOf(state.i).at(-1);
   state.s = state.n === "all" && p.get("s") in SIZE_RANGE ? p.get("s") : "all";
   state.l = p.get("l") === "it" ? "it" : "en";
-  state.v = VIEWS.includes(p.get("v")) ? p.get("v") : "map";
   state.c = covered.includes(p.get("c")) ? p.get("c") : null;
   state.k = [...new Set((p.get("cmp") ?? "").split(","))].filter((c) => covered.includes(c)).slice(0, MAXK);
   state.sx = p.get("sx") in IND ? p.get("sx") : "any";
   state.sy = p.get("sy") in IND ? p.get("sy") : "ble";
 }
 function writeHash() {
-  const { y, s, l, i, v, c, n, k, sx, sy } = state;
-  const extra = [n !== "all" && `n=${n}`, i !== "any" && `i=${i}`, v !== "map" && `v=${v}`, c && `c=${c}`, k.length && `cmp=${k.join(",")}`,
+  const { y, s, l, i, c, n, k, sx, sy } = state;
+  const extra = [n !== "all" && `n=${n}`, i !== "any" && `i=${i}`, c && `c=${c}`, k.length && `cmp=${k.join(",")}`,
     sx !== "any" && `sx=${sx}`, sy !== "ble" && `sy=${sy}`, l === "it" && "l=it"].filter(Boolean);
   history.replaceState(null, "", `#${[`y=${y}`, `s=${s}`, ...extra].join("&")}`);
 }
@@ -294,8 +290,6 @@ function setLang(l) {
   document.querySelectorAll("[data-i18n]").forEach((e) => (e.textContent = t[e.dataset.i18n]));
   document.querySelectorAll("#sizes button").forEach((b) =>
     (b.innerHTML = `${t.sizes[b.dataset.s]}<small>${SIZE_RANGE[b.dataset.s]}</small>`));
-  document.querySelectorAll("#views button").forEach((b) => (b.textContent = t[b.dataset.v]));
-  $("views").setAttribute("aria-label", t.view); // no visible label: the toggle sits on the map it switches
   syncPlay();
   syncTheme();
   Object.assign($("yearNote"), { hidden: !SKIPPED.length, textContent: SKIPPED.length ? t.skipped(SKIPPED.join(", ")) : "" });
@@ -349,7 +343,7 @@ const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const DUR = reduced ? 0 : 550;
 const ROW = 21; // ranking row height, px
 
-// ---- map / globe ----
+// ---- map ----
 const W = 600, H = 620;
 const svg = d3.select("#map");
 const defs = svg.append("defs");
@@ -357,45 +351,17 @@ defs.append("pattern").attr("id", "hatch").attr("width", 5).attr("height", 5)
   .attr("patternUnits", "userSpaceOnUse").attr("patternTransform", "rotate(45)")
   .call((p) => { p.append("rect").attr("class", "hatch-bg").attr("width", 5).attr("height", 5);
                  p.append("line").attr("class", "hatch-line").attr("y2", 5); });
-// limb shading: transparent centre, darker rim, so the sphere reads as 3D
-defs.append("radialGradient").attr("id", "limb").attr("cx", "42%").attr("cy", "38%").attr("r", "62%")
-  .selectAll("stop").data([[0, 0], [0.75, 0.1], [1, 0.32]]).join("stop")
-  .attr("offset", (d) => d[0]).attr("class", "limb-stop").attr("stop-opacity", (d) => d[1]);
 
 const EUROPE = { type: "MultiPoint", coordinates: [[-10, 36], [33, 35], [44, 41], [30, 70], [-9, 62], [5, 71]] };
 const mapProj = d3.geoAzimuthalEqualArea().rotate([-14, -52]).clipAngle(50).fitExtent([[8, 8], [W - 8, H - 8]], EUROPE);
-const HOME = [-14, -50];
-const globeProj = d3.geoOrthographic().rotate(HOME).clipAngle(90).fitExtent([[18, 18], [W - 18, H - 18]], { type: "Sphere" });
-globeProj.scale(globeProj.scale() * 1.25); // a bit closer: Europe fills more of the frame, the rim stays visible
 const path = d3.geoPath(mapProj);
 const feats = topojson.feature(world, world.objects.countries).features;
 const isCovered = (f) => byNum[f.id];
-const sphere = svg.append("path").datum({ type: "Sphere" }).attr("class", "sphere");
-const grat = svg.append("path").datum(d3.geoGraticule10()).attr("class", "graticule");
 const land = svg.append("g").selectAll("path").data(feats.filter((f) => !isCovered(f))).join("path").attr("class", "land");
 const ctry = svg.append("g").selectAll("path").data(feats.filter(isCovered)).join("path")
   .attr("class", "ctry").attr("tabindex", 0).attr("role", "button");
-const limb = svg.append("path").datum({ type: "Sphere" }).attr("class", "limb").attr("fill", "url(#limb)");
-function draw() {
-  const globe = state.v === "globe";
-  path.projection(globe ? globeProj : mapProj);
-  for (const sel of [sphere, grat, limb]) sel.attr("display", globe ? null : "none").attr("d", path);
-  land.attr("d", path);
-  ctry.attr("d", path);
-}
-let drawQueued = false;
-const queueDraw = () => { if (!drawQueued) { drawQueued = true; requestAnimationFrame(() => { drawQueued = false; draw(); }); } };
-// ponytail: redraws all 50m paths per frame while dragging; switch to the 110m atlas during drag if phones stutter
-svg.call(d3.drag().filter((e) => state.v === "globe" && !e.button)
-  .on("start", () => { hideTip(); svg.classed("dragging", true); })
-  .on("drag", (e) => { const [l, p] = globeProj.rotate(); globeProj.rotate([l + e.dx * 0.3, Math.max(-90, Math.min(90, p - e.dy * 0.3))]); queueDraw(); })
-  .on("end", () => svg.classed("dragging", false)));
-function spinIn() { // short turn from the Atlantic onto Europe when the globe opens
-  if (!DUR) { globeProj.rotate(HOME); return draw(); }
-  const from = [HOME[0] + 70, HOME[1] + 20];
-  d3.select({}).transition().duration(1100).ease(d3.easeCubicOut)
-    .tween("spin", () => { const r = d3.interpolate(from, HOME); return (k) => { globeProj.rotate(r(k)); draw(); }; });
-}
+land.attr("d", path);
+ctry.attr("d", path);
 
 // ---- tooltip + linked highlight (map <-> ranking) ----
 const wrap = document.querySelector(".mapwrap"), tip = $("tip");
@@ -429,7 +395,7 @@ const hideTip = () => { tipFor = null; tip.hidden = true; highlight(null); };
 const local = (e) => { const r = wrap.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
 function tipAtCountry(c) {
   const f = ctry.data().find((g) => byNum[g.id] === c), [cx, cy] = path.centroid(f);
-  if (Number.isNaN(cx)) return; // on the far side of the globe
+  if (Number.isNaN(cx)) return; // outside the map's frame
   const k = wrap.getBoundingClientRect().width / W;
   showTip(c, cx * k, cy * k); highlight(c);
 }
@@ -438,7 +404,7 @@ function openCountry(c, scroll = matchMedia("(max-width: 919px)").matches) {
   if (scroll) { hideTip(); $("rank").scrollIntoView({ behavior: DUR ? "smooth" : "auto", block: "start" }); }
 }
 ctry
-  .on("pointermove", (e, f) => { if (!svg.classed("dragging")) { showTip(byNum[f.id], ...local(e)); highlight(byNum[f.id]); } })
+  .on("pointermove", (e, f) => { showTip(byNum[f.id], ...local(e)); highlight(byNum[f.id]); })
   .on("pointerleave", (e) => { if (e.pointerType === "mouse") hideTip(); })
   .on("click", (e, f) => openCountry(byNum[f.id]))
   .on("keydown", (e, f) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCountry(byNum[f.id]); } })
@@ -1067,7 +1033,7 @@ document.addEventListener("keydown", (e) => {
 // ---- render ----
 let heroVal = null;
 function render() {
-  const { s, l, i, v, c, n } = state;
+  const { s, l, i, c, n } = state;
   if (!yearsOf(i).includes(state.y)) { state.y = yearsOf(i).at(-1); writeHash(); }
   const y = state.y, sc = scaleOf(i);
   rows = covered.filter((k) => val(i, k, s, y) != null).sort((a, b) => val(i, b, s, y) - val(i, a, s, y));
@@ -1075,7 +1041,7 @@ function render() {
   ctry.style("fill", (f) => fill(byNum[f.id])).classed("sel", (f) => byNum[f.id] === c)
     .attr("aria-label", (f) => { const k = byNum[f.id], x = val(i, k, s, y);
       return `${name(k)}${EU.has(k) ? "" : ` (${t.nonEU})`}: ${x == null ? t.noData : pct(x)}`; });
-  svg.attr("aria-label", v === "globe" ? t.globeLabel : t.mapLabel).classed("globe", v === "globe");
+  svg.attr("aria-label", t.mapLabel);
   if (tipFor) tip.innerHTML = tipHtml(tipFor);
 
   // legend for this indicator's bins
@@ -1116,7 +1082,6 @@ function render() {
   });
   $("sizeNote").hidden = n === "all";
   $("sector").value = n;
-  document.querySelectorAll("#views button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === v));
   document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.l === l));
   $("ind").value = i;
   $("play").disabled = yearsOf(i).length < 2;
@@ -1169,16 +1134,14 @@ function syncPlay() { $("play").classList.toggle("on", !!timer); }
 function stop() { clearInterval(timer); timer = null; syncPlay(); render(); }
 function set(patch) {
   const opened = patch.c && patch.c !== state.c, closed = "c" in patch && !patch.c && state.c;
-  const prevC = state.c, viewChanged = patch.v && patch.v !== state.v;
+  const prevC = state.c;
   Object.assign(state, patch); writeHash(); render();
-  if (viewChanged) { if (state.v === "globe") spinIn(); else draw(); }
   if (opened || closed) $("rank").scrollTop = 0;
   if (opened) $("cpName")?.focus({ preventScroll: true });
   if (closed) ctry.filter((f) => byNum[f.id] === prevC).node()?.focus({ preventScroll: true });
 }
 $("years").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { if (timer) stop(); set({ y: b.dataset.y }); } });
 $("sizes").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) set({ s: b.dataset.s }); });
-$("views").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) set({ v: b.dataset.v }); });
 $("ind").addEventListener("change", (e) => set({ i: e.target.value }));
 $("sector").addEventListener("change", (e) => set({ n: e.target.value, s: e.target.value === "all" ? state.s : "all" }));
 document.querySelector(".lang").addEventListener("click", (e) => {
@@ -1195,10 +1158,8 @@ $("play").addEventListener("click", () => {
   syncPlay();
   if (state.y === ys.at(-1)) set({ y: ys[0] }); else render();
 });
-addEventListener("hashchange", () => { const v = state.v; readHash(); setLang(state.l); render(); if (state.v !== v) draw(); });
+addEventListener("hashchange", () => { readHash(); setLang(state.l); render(); });
 
 readHash();
 setLang(state.l);
-draw();
 render();
-if (state.v === "globe") spinIn();

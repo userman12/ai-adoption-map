@@ -8,7 +8,7 @@
   --paper:#f5f6f8;--panel:#ffffff;--ink:#0f1a2e;--muted:#4f5a6c;--faint:#646d7e;--line:#e1e5ec;
   --eu:#b7791f;--eu-ink:#94600f;--land:#e7eaf0;--edge:#ffffff;--focus:#2546d6;
   --b0:#e2e7f6;--b1:#b1bdea;--b2:#7b8fd9;--b3:#4a5fc1;--b4:#22328c;
-  --nodata:#eef0f4;--hatch:#a6aebb;--ocean:#e2e9f4;--limb:#0f1a2e;--shadow:0 1px 2px rgba(15,26,46,.06),0 8px 24px rgba(15,26,46,.06);--tip-shadow:0 6px 24px rgba(15,26,46,.16);--float:0 1px 2px rgba(15,26,46,.1),0 4px 14px rgba(15,26,46,.1);
+  --nodata:#eef0f4;--hatch:#a6aebb;--shadow:0 1px 2px rgba(15,26,46,.06),0 8px 24px rgba(15,26,46,.06);--tip-shadow:0 6px 24px rgba(15,26,46,.16);--float:0 1px 2px rgba(15,26,46,.1),0 4px 14px rgba(15,26,46,.1);
 }
 /* dark: set on <html> by the head script (saved choice, else the system setting) */
 :root[data-theme=dark]{color-scheme:dark;
@@ -16,7 +16,7 @@
   --eu:#e3a848;--eu-ink:#e3a848;--land:#18203a;--edge:#0c1120;--focus:#8ea2ff;
   /* dark: low recedes into the surface, high carries the light */
   --b0:#27325e;--b1:#34479a;--b2:#4f68c9;--b3:#8299ec;--b4:#cdd7fb;
-  --nodata:#161e33;--hatch:#465169;--ocean:#0f1830;--limb:#000000;--shadow:none;--tip-shadow:0 8px 24px rgba(0,0,0,.45);--float:0 2px 10px rgba(0,0,0,.5);
+  --nodata:#161e33;--hatch:#465169;--shadow:none;--tip-shadow:0 8px 24px rgba(0,0,0,.45);--float:0 2px 10px rgba(0,0,0,.5);
 }
 
 *{box-sizing:border-box}
@@ -140,12 +140,9 @@ select:hover{border-color:var(--faint)}
 }
 .mapwrap,.rank{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
 .mapwrap{position:relative;margin:0;overflow:hidden}
-/* map / globe toggle floats over the top-right corner of the map */
-.mapwrap .views{position:absolute;top:12px;right:12px;z-index:2;border-color:transparent;box-shadow:var(--float)}
-.mapwrap .views button{min-height:30px;padding:4px 12px;font-size:13px}
 #map{display:block;width:100%;height:auto}
-/* find a country: top-left of the map, the same floating look as the map/globe toggle */
-.find{position:absolute;top:12px;left:12px;z-index:2;width:min(230px,calc(100% - 176px));border-radius:10px;background:var(--panel);box-shadow:var(--float)}
+/* find a country: floats over the top-left corner of the map */
+.find{position:absolute;top:12px;left:12px;z-index:2;width:min(260px,calc(100% - 24px));border-radius:10px;background:var(--panel);box-shadow:var(--float)}
 .find svg{position:absolute;left:11px;top:50%;margin-top:-7.5px;color:var(--muted);pointer-events:none}
 #find{display:block;width:100%;height:38px;padding:0 10px 0 33px;border:1px solid transparent;border-radius:10px;background:none;
   font:inherit;font-size:13.5px;color:var(--ink)}
@@ -153,8 +150,6 @@ select:hover{border-color:var(--faint)}
 #find:focus-visible{outline:2px solid var(--focus);outline-offset:0}
 /* empty field: drop the clear button, which Chrome keeps (invisible) beside the placeholder and cuts it short */
 #find:placeholder-shown::-webkit-search-cancel-button{display:none}
-/* phones: a slimmer map/globe toggle leaves the field room for its whole placeholder */
-@media (max-width:540px){.find{width:calc(100% - 164px)} .mapwrap .views button{padding:4px 9px}}
 /* suggestions: about seven rows, then the list scrolls; a bit wider than the field on phones so names stay on one line */
 #findList{position:absolute;top:calc(100% + 4px);left:0;width:max(100%,200px);max-height:240px;overflow-y:auto;overscroll-behavior:contain;
   margin:0;padding:4px;list-style:none;border-radius:10px;background:var(--panel);box-shadow:var(--float)}
@@ -165,9 +160,6 @@ select:hover{border-color:var(--faint)}
 .ctry{stroke:var(--edge);stroke-width:.7;cursor:pointer;outline:none;transition:fill .5s}
 .ctry:hover,.ctry.hl{stroke:var(--ink);stroke-width:1.4}
 .ctry.sel{stroke:var(--ink);stroke-width:2.2}
-.sphere{fill:var(--ocean)} .graticule{fill:none;stroke:var(--line);stroke-width:.5}
-.limb{pointer-events:none} .limb-stop{stop-color:var(--limb)}
-#map.globe{cursor:grab;touch-action:none} #map.dragging{cursor:grabbing}
 .ctry:focus-visible{stroke:var(--focus);stroke-width:2.5}
 .hatch-bg{fill:var(--nodata)} .hatch-line{stroke:var(--hatch);stroke-width:1}
 

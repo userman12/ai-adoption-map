@@ -29,8 +29,7 @@ How fast is AI spreading through European businesses? An interactive map of the 
 - **Small vs large enterprises**: below the map, one row per country joins the shares of small, medium and large enterprises on a shared axis, with the EU27 row on top. Sort by the gap (large minus small, in percentage points) or by either size; hover or focus a row for the three values, click it for the country profile. Click the title to fold the section away or open it again.
 - **Two indicators, every country**: a scatter chart with any two indicators on the axes, one dot per country and dashed EU27 reference lines. The axes stay fixed across years, so Play moves the dots. It describes, it doesn't explain: the page says so.
 - **Data table and CSV**: every country and survey year for the current indicator, size or sector, with Eurostat's notes. The CSV keeps every decimal Eurostat publishes and follows the page language (comma-separated in English; semicolons and decimal commas in Italian, as Excel expects there).
-- **Map or 3D globe**: switch to a draggable orthographic globe that turns to face Europe.
-- **Shareable links**: the whole view lives in the URL, so any view is a link: `#y=2024&s=large&i=pms&v=globe&c=IT&l=it`, `#n=J&i=tnlg` or `#cmp=IT,DE,FR&sx=any&sy=ble` (year, size, sector, indicator, globe, open country, language, compared countries, scatter axes).
+- **Shareable links**: the whole view lives in the URL, so any view is a link: `#y=2024&s=large&i=pms&c=IT&l=it`, `#n=J&i=tnlg` or `#cmp=IT,DE,FR&sx=any&sy=ble` (year, size, sector, indicator, open country, language, compared countries, scatter axes).
 - **English and Italian**, including number formats (20.0% / 20,0%).
 - **Light and dark theme**: follows the system setting until you pick one with the switch next to the language buttons; the choice is kept in your browser only.
 - **Keyboard**: ← → change year, Space plays or pauses, / or Cmd/Ctrl+K finds a country, Esc closes tooltips, the tour and the profile.
@@ -64,7 +63,7 @@ There is no build step. Any static host works; this one is GitHub Pages, from th
 ## Files
 
 - `index.html`: the page, with every text slot filled by `app.js`.
-- `app.js`: data loading, the English and Italian texts, the map and globe, the charts, the URL state.
+- `app.js`: data loading, the English and Italian texts, the map, the charts, the URL state.
 - `styles.css`: layout, light and dark themes.
 - `data/`: the two Eurostat extracts. `scripts/`: fetch and validate them.
 - `fonts/`: Schibsted Grotesk (400, 500, 700, Latin), self-hosted, with its licence.
