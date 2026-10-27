@@ -643,6 +643,14 @@ d3.select("#gapBody")
   .on("focusout", hideGapTip)
   .on("click", (e) => { const li = e.target.closest("#gapList li"); if (li) { hideGapTip(); openCountry(d3.select(li).datum(), true); } });
 $("gapSort").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { gapSort = b.dataset.o; renderGap(); } });
+// the title opens and closes the section; closed, its rows leave the tab order
+function setGapOpen(open) {
+  $("gapFold").setAttribute("aria-expanded", open);
+  $("gapPanel").classList.toggle("shut", !open);
+  $("gapPanel").inert = !open;
+  if (!open) hideGapTip();
+}
+$("gapFold").addEventListener("click", () => setGapOpen($("gapFold").getAttribute("aria-expanded") !== "true"));
 
 // ---- share: the whole view lives in the URL; copy it and say so ----
 let sayT;
@@ -985,6 +993,7 @@ function showStep(k) {
   $("tour").hidden = false;
   document.body.classList.add("touring");
   paintStep();
+  if (st.to === "#gapSec") setGapOpen(true); // the tour talks about this chart: show it
   document.querySelector(st.to).scrollIntoView({ behavior: DUR ? "smooth" : "auto", block: "start" });
 }
 function endTour() {

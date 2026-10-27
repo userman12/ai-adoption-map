@@ -125,9 +125,14 @@
 <section class="sec" id="gapSec" aria-labelledby="gapTitle">
   <div class="sec-head">
     <div>
-      <h2 id="gapTitle" data-i18n="gapTitle"></h2>
+      <!-- the title opens and closes the section -->
+      <h2><button class="fold" id="gapFold" type="button" aria-expanded="true" aria-controls="gapPanel"><span id="gapTitle" data-i18n="gapTitle"></span><svg class="chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5"/></svg></button></h2>
       <p class="hint" id="gapSub"></p>
     </div>
+  </div>
+  <div class="fold-panel" id="gapPanel"><div>
+  <div class="gap-tools">
+    <p class="gap-key" id="gapKey"></p>
     <div class="ctl">
       <p class="ctl-lbl" id="sortLbl" data-i18n="sortBy"></p>
       <div class="seg" id="gapSort" role="group" aria-labelledby="sortLbl">
@@ -137,7 +142,6 @@
       </div>
     </div>
   </div>
-  <p class="gap-key" id="gapKey"></p>
   <p class="hint" id="gapHint" data-i18n="gapHint"></p>
   <div id="gapBody">
     <div class="gap-axis" id="gapAxis" aria-hidden="true"></div>
@@ -149,6 +153,7 @@
     <ol class="gap-list" id="gapList"></ol>
   </div>
   <p class="note stack" id="gapNote"></p>
+  </div></div>
   <div class="tip" id="gapTip" role="status" hidden></div>
 </section>
 
