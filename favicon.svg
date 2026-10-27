@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- the EU27 share using AI in the four survey years (7.7, 8.1, 13.5, 20.0%), bars to scale; 2025 in the EU gold -->
+  <rect width="32" height="32" rx="7" fill="#22328c"/>
+  <g fill="#b1bdea">
+    <rect x="4" y="18.9" width="4.5" height="9.1" rx="1"/>
+    <rect x="10.5" y="18.5" width="4.5" height="9.5" rx="1"/>
+    <rect x="17" y="12.8" width="4.5" height="15.2" rx="1"/>
+  </g>
+  <rect x="23.5" y="6" width="4.5" height="22" rx="1" fill="#e3a848"/>
+</svg>
